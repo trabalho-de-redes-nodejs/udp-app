@@ -1,6 +1,6 @@
 {
   "env": {
-    "browser": true,
+    "node": true,
     "es2021": true
   },
   "extends": ["prettier", "eslint:recommended", "plugin:import/errors", "plugin:import/warnings"],
@@ -25,7 +25,7 @@
     "@typescript-eslint/no-unused-vars": ["error"],
     "no-param-reassign": 0,
     "import/order": 2,
-    "no-console": 2,
+    "no-console": 0,
     "jsx-a11y/anchor-is-valid": 0,
     "prefer-destructuring": 0,
     "no-shadow": 0,
