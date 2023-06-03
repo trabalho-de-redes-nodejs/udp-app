@@ -1,0 +1,53 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": ["prettier", "eslint:recommended", "plugin:import/errors", "plugin:import/warnings"],
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "moduleDirectory": ["node_modules", "src/"]
+      }
+    }
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true,
+      "impliedStrict": true
+    },
+    "ecmaVersion": 12
+  },
+  "plugins": ["prettier", "import", "@typescript-eslint"],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": ["error"],
+    "no-param-reassign": 0,
+    "import/order": 2,
+    "no-console": 2,
+    "jsx-a11y/anchor-is-valid": 0,
+    "prefer-destructuring": 0,
+    "no-shadow": 0,
+    "no-else-return": "error",
+    "no-var": "error",
+    "no-unused-vars": [
+      0,
+      {
+        "ignoreRestSiblings": true
+      }
+    ],
+    "prettier/prettier": [
+      2,
+      {
+        "bracketSpacing": true,
+        "printWidth": 140,
+        "singleQuote": true,
+        "trailingComma": "none",
+        "tabWidth": 2,
+        "useTabs": false,
+        "endOfLine": "auto"
+      }
+    ]
+  }
+}
