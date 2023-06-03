@@ -3,16 +3,28 @@
     "node": true,
     "es2021": true
   },
-  "extends": ["prettier", "eslint:recommended", "plugin:import/errors", "plugin:import/warnings"],
+  "extends": [
+    "prettier",
+    "eslint:recommended",
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+  ],
   "settings": {
     "import/resolver": {
       "node": {
-        "moduleDirectory": ["node_modules", "src/"]
+        "moduleDirectory": ["node_modules", "src/"],
+        "extensions": [".ts", ".tsx", ".d.ts"],
+        "project": ["./tsconfig.json"],
+        "typescript": {}
       }
     }
   },
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
+    "project": "./tsconfig.json",
+    "tsconfigRootDir": "./",
     "sourceType": "module",
     "ecmaFeatures": {
       "experimentalObjectRestSpread": true,
@@ -31,6 +43,7 @@
     "no-shadow": 0,
     "no-else-return": "error",
     "no-var": "error",
+    "import/no-unresolved": [2, { "caseSensitive": false }],
     "no-unused-vars": [
       0,
       {
