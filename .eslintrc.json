@@ -47,6 +47,7 @@
     "eslint/require-await": 0,
     "no-unsafe-assignment": 0,
     "no-constant-condition": 0,
+    "@typescript-eslint/no-explicit-any": 0,
     "no-unused-vars": [
       0,
       {
