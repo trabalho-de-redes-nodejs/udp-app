@@ -5,7 +5,7 @@ import { serverAddress, serverPort } from 'config/config';
 dotenv.config();
 const socket = dgram.createSocket('udp4');
 
-const msgFromServer = 'Oi UDP Cliente';
+const msgFromServer = 'STATUS 200';
 const bytesToSend = Buffer.from(msgFromServer);
 
 socket.bind(serverPort, serverAddress, () => {
@@ -13,11 +13,7 @@ socket.bind(serverPort, serverAddress, () => {
 });
 
 socket.on('message', (message: string, remoteInfo) => {
-  const clientMsg = `Mensagem do Cliente: ${message}`;
-  const clientIP = `Endereco IP do Cliente: ${remoteInfo.address}:${remoteInfo.port}`;
-
+  const clientMsg = `message ${message} from ${remoteInfo.address}:${remoteInfo.port}`;
   console.log(clientMsg);
-  console.log(clientIP);
-
   socket.send(bytesToSend, remoteInfo.port, remoteInfo.address);
 });
