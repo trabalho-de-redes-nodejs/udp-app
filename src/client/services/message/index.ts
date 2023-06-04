@@ -15,8 +15,8 @@ const sendMessage = (client: Socket): void => {
 
       Printer.requestLog(msgFromClient);
 
-      client.on('message', (msgFromServer: string) => {
-        Printer.serverResponseLog(msgFromServer);
+      client.on('message', (msgFromServer: any) => {
+        Printer.serverResponseLog(`${msgFromServer}`);
         client.close();
       });
     });
