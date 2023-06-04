@@ -15,17 +15,15 @@ const menu: INavigation[] = [
 ];
 
 const main = (): void => {
-  while (true) {
-    Printer.menu(menu);
+  Printer.menu(menu);
 
-    const option = Listener.int('Select an option:', { min: 0, max: menu.length - 1 });
+  const option = Listener.int('Select an option:', { min: 0, max: menu.length - 1 });
 
-    if (menu[option]) {
-      menu[option].run(client);
-    }
-
-    Printer.spacer();
+  if (menu[option]) {
+    menu[option].run(client);
   }
+
+  Printer.spacer();
 };
 
 main();
