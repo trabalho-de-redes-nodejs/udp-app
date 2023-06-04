@@ -1,4 +1,4 @@
-export interface INavigation {
+interface INavigation {
   title: string;
-  run: () => void;
+  run: (client: Socket) => void;
 }

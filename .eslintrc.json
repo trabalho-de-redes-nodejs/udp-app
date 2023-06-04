@@ -44,6 +44,9 @@
     "no-else-return": "error",
     "no-var": "error",
     "import/no-unresolved": [2, { "caseSensitive": false }],
+    "eslint/require-await": 0,
+    "no-unsafe-assignment": 0,
+    "no-constant-condition": 0,
     "no-unused-vars": [
       0,
       {

@@ -1,12 +1,23 @@
 import dgram from 'dgram';
 import dotenv from 'dotenv';
+import { serverAddress, serverPort } from 'config/config';
 
 dotenv.config();
 const socket = dgram.createSocket('udp4');
 
-socket.on('message', (msg, rinfo) => {
-  console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
+const msgFromServer = 'Oi UDP Cliente';
+const bytesToSend = Buffer.from(msgFromServer);
+
+socket.bind(serverPort, serverAddress, () => {
+  console.log(`Server listening on ${serverAddress}:${serverPort}`);
 });
 
-socket.bind(process.env.API_PORT);
-console.log(`Server listening on ${process.env.API_PORT}`);
+socket.on('message', (message: string, remoteInfo) => {
+  const clientMsg = `Mensagem do Cliente: ${message}`;
+  const clientIP = `Endereco IP do Cliente: ${remoteInfo.address}:${remoteInfo.port}`;
+
+  console.log(clientMsg);
+  console.log(clientIP);
+
+  socket.send(bytesToSend, remoteInfo.port, remoteInfo.address);
+});
