@@ -1,11 +1,11 @@
 import { Socket } from 'dgram';
+import { Reader } from 'client/lib/Reader';
 import { serverAddress, serverPort } from 'config/config';
-import { Listener } from 'client/lib/Listener';
 import { Printer } from 'client/lib/Printer';
 
 const sendMessage = (client: Socket): void => {
   try {
-    const msgFromClient = Listener.string('Type a message to send to the server:');
+    const msgFromClient = Reader.string('Type a message to send to the server:');
     const bytesToSend = Buffer.from(msgFromClient);
 
     client.send(bytesToSend, 0, bytesToSend.length, serverPort, serverAddress, (err) => {

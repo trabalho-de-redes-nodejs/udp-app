@@ -1,29 +1,26 @@
 import { serverAddress, serverPort } from 'config/config';
 
 interface IPrinter {
-  menu: (menuData: INavigation[]) => void;
-  error: (message: any) => void;
+  menu: (labels: string[]) => void;
   spacer: () => void;
   requestLog: (requestData: string) => void;
   serverResponseLog: (responseData: string) => void;
 }
 
 export const Printer: IPrinter = {
-  menu: (menuData: INavigation[]) => {
+  menu: (labels: string[]): void => {
     console.info('|----------------| Menu |----------------|\n');
-    const menuString: string = menuData.map((item: INavigation, index: number) => `[${index}] ${item.title}\n`).join('');
+    const menuString: string = labels.map((item: string, index: number) => `[${index}] ${item}\n`).join('');
     console.info(menuString);
   },
-  error: (message: string) => {
-    console.error(`Error: ${message}`);
-  },
-  spacer: () => {
+
+  spacer: (): void => {
     console.info('\n\n\n');
   },
-  requestLog: (requestData: any) => {
+  requestLog: (requestData: any): void => {
     console.log(`Sending message < `, requestData, ` > to server ${serverAddress}:${serverPort}`);
   },
-  serverResponseLog: (responseData: any) => {
+  serverResponseLog: (responseData: any): void => {
     console.log(`Receive Message from server: `, responseData);
   },
 };

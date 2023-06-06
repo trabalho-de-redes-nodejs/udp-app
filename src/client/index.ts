@@ -1,5 +1,5 @@
 import dgram, { Socket } from 'dgram';
-import { Listener } from './lib/Listener';
+import { Reader } from './lib/Reader';
 import { Printer } from './lib/Printer';
 import { sendMessage } from './services/message';
 import { sendFile } from './services/file';
@@ -22,9 +22,9 @@ const menu: INavigation[] = [
 ];
 
 const main = (): void => {
-  Printer.menu(menu);
+  Printer.menu(menu.map((item) => item.title));
 
-  const option = Listener.int('Select an option:', { min: 0, max: menu.length - 1 });
+  const option: number = Reader.integer('Select an option:', { min: 0, max: menu.length - 1 });
 
   if (menu[option]) {
     const run = menu[option].run(client);
@@ -32,10 +32,10 @@ const main = (): void => {
     if (run instanceof Promise) {
       run
         .then(() => {
-          Printer.error('Done!');
+          console.error('Done!');
         })
         .catch((error) => {
-          Printer.error(error);
+          console.error(error);
         });
     }
   }
