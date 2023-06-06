@@ -1,4 +1,4 @@
 interface INavigation {
   title: string;
-  run: (client: Socket) => void;
+  run: (client: Socket) => void | Promise<void>;
 }
