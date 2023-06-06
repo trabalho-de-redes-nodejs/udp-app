@@ -5,7 +5,7 @@ import { Printer } from 'client/lib/Printer';
 
 const sendMessage = (client: Socket): void => {
   try {
-    const msgFromClient = Reader.string('Type a message to send to the server:');
+    const msgFromClient: string = Reader.string('Type a message to send to the server:');
     const bytesToSend = Buffer.from(msgFromClient);
 
     client.send(bytesToSend, 0, bytesToSend.length, serverPort, serverAddress, (err) => {
@@ -21,7 +21,7 @@ const sendMessage = (client: Socket): void => {
       });
     });
   } catch (err) {
-    Printer.error(err);
+    console.error(err);
   }
 };
 
