@@ -10,7 +10,7 @@ const readFileName = (message = '') => {
       const processedValue = validateFileName(input);
 
       if (processedValue instanceof Error) {
-        console.error(processedValue.message);
+        console.info(processedValue.message);
         continue;
       }
 

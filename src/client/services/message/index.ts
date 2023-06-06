@@ -3,7 +3,7 @@ import { Reader } from 'client/lib/Reader';
 import { serverAddress, serverPort } from 'config/config';
 import { Printer } from 'client/lib/Printer';
 
-const sendMessage = (client: Socket): void => {
+const sendMessage = async (client: Socket): Promise<void> => {
   try {
     const msgFromClient: string = Reader.string('Type a message to send to the server:');
     const bytesToSend = Buffer.from(msgFromClient);

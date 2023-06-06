@@ -9,14 +9,22 @@ const client: Socket = dgram.createSocket('udp4');
 const menu: INavigation[] = [
   {
     title: 'Send a String to the Server',
-    run: (client: Socket) => {
-      sendMessage(client);
+    run: async (client: Socket) => {
+      await sendMessage(client);
     },
   },
   {
     title: 'Send a File to the Server',
-    run: (client: Socket) => {
-      sendFile(client);
+    run: async (client: Socket) => {
+      await sendFile(client).catch((err) => console.error(err));
+    },
+  },
+  {
+    title: 'Exit',
+    run: () => {
+      client.close();
+      console.info('Bye!');
+      process.exit(0);
     },
   },
 ];
@@ -26,21 +34,15 @@ const main = (): void => {
 
   const option: number = Reader.integer('Select an option:', { min: 0, max: menu.length - 1 });
 
-  if (menu[option]) {
-    const run = menu[option].run(client);
-
-    if (run instanceof Promise) {
-      run
-        .then(() => {
-          console.error('Done!');
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    }
+  if (!menu[option]) {
+    console.info('Invalid option');
+    main();
   }
 
-  Printer.spacer();
+  menu[option].run(client).then(() => {
+    Printer.spacer();
+    main();
+  });
 };
 
 main();

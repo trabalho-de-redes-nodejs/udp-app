@@ -1,61 +1,66 @@
 import { Socket } from 'dgram';
 import fs from 'fs';
+import path from 'path';
 
+import { createFileWithRandomContent } from 'utils/files';
 import { Reader } from 'client/lib/Reader';
 import { Printer } from 'client/lib/Printer';
 
-const sendFile = (client: Socket): void => {
+const directory = 'src/client/input';
+
+const sendFile = async (client: Socket): Promise<void> => {
   try {
-    chooseFile();
+    const fileName = await chooseFileOrCreate().then((file) => file);
+    console.log(fileName, client);
   } catch (err) {
-    Printer.error(err);
+    console.error(err);
   }
 };
 
-const chooseFile = (): string => {
-  const directory = '../../input';
+const chooseFileOrCreate = async (): Promise<string | void | Error> => {
+  const getFilesFromDirectory = (directory: string): string[] => {
+    if (!fs.existsSync(directory)) {
+      console.error(`Error reading directory ${directory}: Directory does not exist`);
 
-  fs.readdir(directory, (err, files) => {
-    if (err) {
-      console.error(`Error reading directory ${directory}: ${err}`);
-      return;
+      fs.mkdirSync(directory);
+
+      return [];
     }
 
-    if (files.length === 0) {
-      console.error(`Error reading directory ${directory}: No files found`);
-      console.error(`Please create a file in ${directory} now:`);
+    return fs.readdirSync(directory);
+  };
 
-      return;
-    }
+  const files: string[] = getFilesFromDirectory(directory);
 
-    files.forEach((file, index) => {
-      const filePath = path.join(directory, file);
-      fs.stat(filePath, (error, stats) => {
-        if (error) {
-          console.error(`Error getting file information for ${filePath}: ${error}`);
-          return;
-        }
+  if (files.length === 0) {
+    console.error(`Error reading directory ${directory}: No files found`);
+  }
 
-        if (stats.isFile()) {
-          console.log(`[${index}] ${file} ${stats.size} bytes`);
-        }
-      });
+  Printer.menu(files, 'Files to send:');
+  console.info(`[${files.length}] Create a new file`);
+
+  const fileIndex = Reader.integer('Choose a file to send:', { min: 0, max: files.length });
+
+  if (fileIndex === files.length) {
+    return await createFileByInput();
+  }
+
+  return path.join(directory, files[fileIndex]);
+};
+
+const createFileByInput = async (): Promise<string> => {
+  const fileName: string = Reader.fileName('Type a file name to create:');
+  const fileSize: number = Reader.integer('Type a file size to create (in bytes):', { min: 0 });
+
+  // eslint-disable-next-line
+  return await createFileWithRandomContent(`${directory}/${fileName}`, fileSize)
+    .then(() => {
+      return path.join(directory, fileName);
+    })
+    .catch((err: any) => {
+      console.error(err);
+      return '';
     });
-  });
-};
-
-const createEmptyFileByInput = async (): Promise<boolean> => {
-  const fileName = Reader.string('Type a file name to create:');
-  const fileSize = Reader.integer('Type a file size to create (in bytes):', { min: 0 });
-};
-
-const createEmptyFileOfSize = (fileName: string, size: number): Promise<boolean> => {
-  return new Promise((resolve) => {
-    const fh = fs.openSync(fileName, 'w');
-    fs.writeSync(fh, 'ok', Math.max(0, size - 2));
-    fs.closeSync(fh);
-    resolve(true);
-  });
 };
 
 export { sendFile };

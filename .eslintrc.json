@@ -51,6 +51,7 @@
     "@typescript-eslint/no-explicit-any": 0,
     "@typescript-eslint/restrict-template-expressions": 0,
     "@typescript-eslint/no-floating-promises": 0,
+    "@typescript-eslint/require-await": 0,
     "no-unused-vars": [
       0,
       {

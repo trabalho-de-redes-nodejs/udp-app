@@ -8,7 +8,7 @@ const readInteger = (message = '', options?: IReaderOptionsInt): number => {
       const processedValue = validateInteger(input, options);
 
       if (processedValue instanceof Error) {
-        console.error(processedValue.message);
+        console.info(processedValue.message);
         continue;
       }
 
