@@ -21,7 +21,7 @@ const sendMessage = (client: Socket): void => {
       });
     });
   } catch (err) {
-    console.log(err);
+    Printer.error(err);
   }
 };
 

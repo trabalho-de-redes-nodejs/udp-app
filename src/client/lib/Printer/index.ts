@@ -2,7 +2,7 @@ import { serverAddress, serverPort } from 'config/config';
 
 interface IPrinter {
   menu: (menuData: INavigation[]) => void;
-  error: (message: string) => void;
+  error: (message: any) => void;
   spacer: () => void;
   requestLog: (requestData: string) => void;
   serverResponseLog: (responseData: string) => void;
@@ -25,5 +25,5 @@ export const Printer: IPrinter = {
   },
   serverResponseLog: (responseData: any) => {
     console.log(`Receive Message from server: `, responseData);
-  }
+  },
 };

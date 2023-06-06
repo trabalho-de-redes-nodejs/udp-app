@@ -10,8 +10,8 @@ const menu: INavigation[] = [
     title: 'Send a String to the Server',
     run: (client: Socket) => {
       sendMessage(client);
-    }
-  }
+    },
+  },
 ];
 
 const main = (): void => {

@@ -35,5 +35,5 @@ export const Listener: IListener = {
   string: (message = '') => {
     const input = readlineSync.question(message);
     return input;
-  }
+  },
 };
