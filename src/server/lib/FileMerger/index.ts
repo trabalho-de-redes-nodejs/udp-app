@@ -20,4 +20,4 @@ const FileMerger: IFileMerger = {
   },
 };
 
-export { FileMerger };
+export default FileMerger;

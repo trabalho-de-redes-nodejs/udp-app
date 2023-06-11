@@ -20,4 +20,4 @@ const FileSplitter: IFileSplitter = {
   },
 };
 
-export { FileSplitter };
+export default FileSplitter;

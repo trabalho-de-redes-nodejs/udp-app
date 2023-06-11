@@ -7,7 +7,7 @@ interface IPrinter {
   serverResponseLog: (responseData: string) => void;
 }
 
-export const Printer: IPrinter = {
+const Printer: IPrinter = {
   menu: (labels: string[], title = 'Menu'): void => {
     console.info(`|----------------| ${title} |----------------|\n`);
     const menuString: string = labels.map((item: string, index: number) => `[${index}] ${item}\n`).join('');
@@ -24,3 +24,5 @@ export const Printer: IPrinter = {
     console.log(`Receive Message from server: `, responseData);
   },
 };
+
+export default Printer;

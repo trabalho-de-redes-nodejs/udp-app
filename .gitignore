@@ -128,3 +128,4 @@ dist
 
 # inputs
 /src/client/input
+/src/server/storage

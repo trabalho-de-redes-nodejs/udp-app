@@ -8,8 +8,10 @@ interface IReader {
   fileName: (message?: string) => string;
 }
 
-export const Reader: IReader = {
+const Reader: IReader = {
   integer: (message = '', options?: IReaderOptionsInt) => readInteger(message, options),
   string: (message = '') => readString(message),
   fileName: (message = '') => readFileName(message),
 };
+
+export default Reader;
