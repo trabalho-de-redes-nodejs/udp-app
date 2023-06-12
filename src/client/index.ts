@@ -1,6 +1,6 @@
 import dgram, { Socket } from 'dgram';
-import { Reader } from './lib/Reader';
-import { Printer } from './lib/Printer';
+import Reader from './lib/Reader';
+import Printer from './lib/Printer';
 import { sendMessage } from './services/message';
 import { sendFile } from './services/file';
 

@@ -3,9 +3,9 @@ import fs from 'fs';
 import path from 'path';
 
 import { createFileWithRandomContent } from 'utils/files';
-import { Reader } from 'client/lib/Reader';
-import { Printer } from 'client/lib/Printer';
-import { FileSplitter } from 'client/lib/FileSplitter';
+import Reader from 'client/lib/Reader';
+import Printer from 'client/lib/Printer';
+import FileSplitter from 'client/lib/FileSplitter';
 
 const directory = 'src/client/input';
 

@@ -1,7 +1,7 @@
 import { Socket } from 'dgram';
-import { Reader } from 'client/lib/Reader';
+import Reader from 'client/lib/Reader';
 import { serverAddress, serverPort } from 'config/config';
-import { Printer } from 'client/lib/Printer';
+import Printer from 'client/lib/Printer';
 
 const sendMessage = async (client: Socket): Promise<void> => {
   try {
