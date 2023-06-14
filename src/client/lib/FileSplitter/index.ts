@@ -1,23 +1,14 @@
-/* eslint-disable import/no-unresolved */
-import splitFile from 'split-file';
+import { deleteFilesFromArray } from './DeleteFilesFromArray';
+import { splitFileBySize } from './SplitFileBySize';
 
 interface IFileSplitter {
   splitFileBySize: (filePath: string, size: number) => Promise<string[] | Error>;
+  deleteFilesFromArray: (parts: string[]) => void;
 }
 
 const FileSplitter: IFileSplitter = {
-  splitFileBySize: async (filePath: string, size: number): Promise<string[] | Error> => {
-    const splittedFile: string[] | void = await splitFile
-      .splitFileBySize(filePath, size)
-      .then((names: string[]) => names)
-      .catch((err: any) => {
-        console.error(err);
-      });
-
-    if (!splittedFile) throw new Error('Error splitting file');
-
-    return splittedFile;
-  },
+  splitFileBySize: splitFileBySize,
+  deleteFilesFromArray: deleteFilesFromArray,
 };
 
 export default FileSplitter;

@@ -6,6 +6,7 @@ import { createFileWithRandomContent } from 'utils/files';
 import Reader from 'client/lib/Reader';
 import Printer from 'client/lib/Printer';
 import FileSplitter from 'client/lib/FileSplitter';
+import { serverAddress, serverPort } from 'config/config';
 
 const directory = 'src/client/input';
 
@@ -13,7 +14,7 @@ const sendFile = async (client: Socket): Promise<void> => {
   try {
     const fileName: string = await chooseFileOrCreate().then((file) => file);
 
-    const splittedFile = await FileSplitter.splitFileBySize(fileName, 1024 * 1024 * 5)
+    const splittedFile = await FileSplitter.splitFileBySize(fileName, 1024)
       .then((names) => names)
       .catch((err) => {
         console.error(err);
@@ -23,6 +24,12 @@ const sendFile = async (client: Socket): Promise<void> => {
     if (!splittedFile || splittedFile === undefined || (splittedFile as string[]).length === 0) {
       return;
     }
+
+    sendFileToServerByParts(client, splittedFile as string[])
+      .catch((err) => console.error(err))
+      .finally(() => {
+        FileSplitter.deleteFilesFromArray(splittedFile as string[]);
+      });
   } catch (err) {
     console.error(err);
   }
@@ -75,11 +82,34 @@ const createFileByInput = async (): Promise<string> => {
 };
 
 const sendFileToServerByParts = async (client: Socket, names: string[]): Promise<void> => {
-  names.forEach((name) => {
-    sendFilePartToServer(client, name);
-  });
+  sendFilePartToServer(client, names[0]);
 };
 
-const sendFilePartToServer = async (client: Socket, name: string): Promise<void> => {};
+const sendFilePartToServer = async (client: Socket, name: string): Promise<void> => {
+  try {
+    const msgFromClient: string = fs.readFileSync(name, { encoding: 'utf-8' });
+
+    console.info(`Sending file ${name} to server...`);
+
+    const bytesToSend = Buffer.from(msgFromClient);
+
+    console.log(bytesToSend.length);
+
+    client.send(bytesToSend, 0, bytesToSend.length, serverPort, serverAddress, (err) => {
+      if (err) {
+        throw err;
+      }
+
+      Printer.requestLog(msgFromClient);
+
+      client.on('message', (msgFromServer) => {
+        Printer.serverResponseLog(`${msgFromServer}`);
+        client.close();
+      });
+    });
+  } catch (err) {
+    console.error(err);
+  }
+};
 
 export { sendFile };
