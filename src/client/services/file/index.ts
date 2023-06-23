@@ -2,12 +2,12 @@ import { Socket } from 'dgram';
 import fs from 'fs';
 import path from 'path';
 
+import FileOperator from 'shared/lib/FileOperator';
 import Reader from 'client/lib/Reader';
 import Printer from 'client/lib/Printer';
-import FileSplitter from 'client/lib/FileSplitter';
 import Protocoler from 'client/lib/Protocoler';
 import Requester from 'client/lib/Requester';
-import FileOperator from 'client/lib/FileOperator';
+import FileSplitter from 'shared/lib/FileSplitter';
 
 const directory = 'src/client/input';
 

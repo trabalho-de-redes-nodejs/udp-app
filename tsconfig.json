@@ -10,7 +10,7 @@
       "client/*": ["src/client/*"],
       "server/*": ["src/server/*"],
       "config/*": ["src/config/*"],
-      "utils/*": ["src/utils/*"]
+      "shared/*": ["src/shared/*"]
     },
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
