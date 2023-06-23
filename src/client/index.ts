@@ -41,6 +41,7 @@ const main = (): void => {
 
   menu[option].run(client).then(() => {
     Printer.spacer();
+    main();
   });
 };
 

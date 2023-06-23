@@ -6,7 +6,7 @@ const splitFileBySize = async (filePath: string, size: number): Promise<string[]
     .splitFileBySize(filePath, size)
     .then((names: string[]) => names)
     .catch((err: any) => {
-      console.error(err);
+      console.error((err as Error)?.message || err);
     });
 
   if (!splittedFile) throw new Error('Error splitting file');

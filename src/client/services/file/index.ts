@@ -6,18 +6,18 @@ import { createFileWithRandomContent } from 'utils/files';
 import Reader from 'client/lib/Reader';
 import Printer from 'client/lib/Printer';
 import FileSplitter from 'client/lib/FileSplitter';
-import { serverAddress, serverPort } from 'config/config';
+import Protocoler from 'client/lib/Protocoler';
+import Requester from 'client/lib/Requester';
 
 const directory = 'src/client/input';
 
 const sendFile = async (client: Socket): Promise<void> => {
   try {
     const fileName: string = await chooseFileOrCreate().then((file) => file);
-
     const splittedFile = await FileSplitter.splitFileBySize(fileName, 1024)
       .then((names) => names)
       .catch((err) => {
-        console.error(err);
+        console.error((err as Error)?.message || err);
         return [];
       });
 
@@ -25,13 +25,14 @@ const sendFile = async (client: Socket): Promise<void> => {
       return;
     }
 
-    sendFileToServerByParts(client, splittedFile as string[])
+    await sendFileToServerByParts(client, splittedFile as string[])
       .catch((err) => console.error(err))
       .finally(() => {
+        client.close();
         FileSplitter.deleteFilesFromArray(splittedFile as string[]);
       });
   } catch (err) {
-    console.error(err);
+    console.error((err as Error)?.message || err);
   }
 };
 
@@ -70,45 +71,39 @@ const createFileByInput = async (): Promise<string> => {
   const fileName: string = Reader.fileName('Type a file name to create:');
   const fileSize: number = Reader.integer('Type a file size to create (in bytes):', { min: 0 });
 
-  // eslint-disable-next-line
   return await createFileWithRandomContent(`${directory}/${fileName}`, fileSize)
     .then(() => {
       return path.join(directory, fileName);
     })
     .catch((err: any) => {
-      console.error(err);
+      console.error((err as Error)?.message || err);
+
       return '';
     });
 };
 
 const sendFileToServerByParts = async (client: Socket, names: string[]): Promise<void> => {
-  sendFilePartToServer(client, names[0]);
+  for (const name of names) {
+    await sendFilePartToServer(client, name, names.indexOf(name) + 1, names.length);
+  }
 };
 
-const sendFilePartToServer = async (client: Socket, name: string): Promise<void> => {
+const sendFilePartToServer = async (client: Socket, name: string, index: number, total: number): Promise<void> => {
   try {
-    const msgFromClient: string = fs.readFileSync(name, { encoding: 'utf-8' });
+    const message: string = fs.readFileSync(name, { encoding: 'utf-8' });
+    const requestObject: IRequest = Protocoler.buildRequestObject('file', total, index, message);
 
     console.info(`Sending file ${name} to server...`);
 
-    const bytesToSend = Buffer.from(msgFromClient);
-
-    console.log(bytesToSend.length);
-
-    client.send(bytesToSend, 0, bytesToSend.length, serverPort, serverAddress, (err) => {
-      if (err) {
-        throw err;
-      }
-
-      Printer.requestLog(msgFromClient);
-
-      client.on('message', (msgFromServer) => {
-        Printer.serverResponseLog(`${msgFromServer}`);
-        client.close();
+    await Requester.request(client, requestObject)
+      .then((response) => {
+        console.log('Response:', response);
+      })
+      .catch((err) => {
+        console.error((err as Error)?.message || err);
       });
-    });
   } catch (err) {
-    console.error(err);
+    console.error('Error sending file to server:', err);
   }
 };
 

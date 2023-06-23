@@ -11,7 +11,7 @@ const FileMerger: IFileMerger = {
       .mergeFiles(inputFiles, outputFile)
       .then(() => true)
       .catch((err: any) => {
-        console.error(err);
+        console.error((err as Error)?.message || err);
       });
 
     if (!mergedFile) throw new Error('Error splitting file');

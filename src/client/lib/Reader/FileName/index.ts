@@ -16,8 +16,7 @@ const readFileName = (message = '') => {
 
       return processedValue;
     } catch (err: any) {
-      // eslint-disable-next-line
-      console.error(err.message);
+      console.error((err as Error)?.message || err);
     }
   }
 };

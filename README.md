@@ -40,7 +40,7 @@ Fluxo UDP em Node.js
 
 0. [x] Estrutura cliente/servidor para envio de mensagens
 1. [x] No cliente, dividir o arquivo em várias parte de tamanho N(min 10) de 1024 bytes
-2. [ ] No cliente, enviar cada parte para o servidor com cabeçalho
+2. [x] No cliente, enviar cada parte para o servidor com cabeçalho
 3. [ ] No servidor, receber cada parte do arquivo e criar um buffer de tamanho N
 4. [x] (async) No servidor, montar o arquivo com os dados do Buffer
 5. [ ] No cliente, fazer o controle de erro e enviar o chunk com erro novamente

@@ -26,7 +26,8 @@ const deleteFile = (fileName: string): Promise<boolean> => {
   return new Promise((resolve) => {
     fs.unlink(fileName, (err) => {
       if (err) {
-        console.error(err);
+        console.error((err as Error)?.message || err);
+
         resolve(false);
       }
 

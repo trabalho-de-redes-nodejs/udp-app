@@ -14,7 +14,7 @@ const readInteger = (message = '', options?: IReaderOptionsInt): number => {
 
       return processedValue;
     } catch (err) {
-      console.error(err);
+      console.error((err as Error)?.message || err);
     }
   }
 };

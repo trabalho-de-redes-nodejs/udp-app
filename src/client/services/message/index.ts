@@ -1,27 +1,22 @@
 import { Socket } from 'dgram';
 import Reader from 'client/lib/Reader';
-import { serverAddress, serverPort } from 'config/config';
-import Printer from 'client/lib/Printer';
+import Protocoler from 'client/lib/Protocoler';
+import Requester from 'client/lib/Requester';
 
 const sendMessage = async (client: Socket): Promise<void> => {
   try {
-    const msgFromClient: string = Reader.string('Type a message to send to the server:');
-    const bytesToSend = Buffer.from(msgFromClient);
+    const message: string = Reader.string('Type a message to send to the server:');
+    const requestObject = Protocoler.buildRequestObject('message', 1, 1, message);
 
-    client.send(bytesToSend, 0, bytesToSend.length, serverPort, serverAddress, (err) => {
-      if (err) {
-        throw err;
-      }
-
-      Printer.requestLog(msgFromClient);
-
-      client.on('message', (msgFromServer: any) => {
-        Printer.serverResponseLog(`${msgFromServer}`);
-        client.close();
+    await Requester.request(client, requestObject)
+      .then((response) => {
+        console.log('Response:', response);
+      })
+      .catch((err) => {
+        console.error((err as Error)?.message || err);
       });
-    });
   } catch (err) {
-    console.error(err);
+    console.error((err as Error)?.message || err);
   }
 };
 

@@ -126,6 +126,9 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# inputs
+# i/o
 /src/client/input
 /src/server/storage
+
+# vscode
+.vscode
