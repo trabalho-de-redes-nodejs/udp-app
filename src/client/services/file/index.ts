@@ -5,9 +5,9 @@ import path from 'path';
 import FileOperator from 'shared/lib/FileOperator';
 import Reader from 'client/lib/Reader';
 import Printer from 'client/lib/Printer';
-import Protocoler from 'client/lib/Protocoler';
 import Requester from 'client/lib/Requester';
 import FileSplitter from 'shared/lib/FileSplitter';
+import Protocoler from 'shared/lib/Protocoler';
 
 const directory = 'src/client/input';
 
@@ -88,8 +88,8 @@ const sendFilePartToServer = async (client: Socket, name: string, index: number,
     console.info(`Sending file ${name} to server...`);
 
     await Requester.request(client, requestObject)
-      .then((response) => {
-        console.log('Response:', response);
+      .then((response: Buffer) => {
+        console.log('Response:', response.toString());
       })
       .catch((err) => {
         console.error((err as Error)?.message || err);

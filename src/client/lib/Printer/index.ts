@@ -4,7 +4,6 @@ interface IPrinter {
   menu: (labels: string[], title?: string) => void;
   spacer: () => void;
   requestLog: (requestData: string) => void;
-  serverResponseLog: (responseData: string) => void;
 }
 
 const Printer: IPrinter = {
@@ -19,9 +18,6 @@ const Printer: IPrinter = {
   },
   requestLog: (requestData: any): void => {
     console.log(`Sending message < `, requestData, ` > to server ${serverAddress}:${serverPort}`);
-  },
-  serverResponseLog: (responseData: any): void => {
-    console.log(`Receive Message from server: `, responseData);
   },
 };
 

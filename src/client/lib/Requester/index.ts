@@ -2,7 +2,7 @@ import { Socket } from 'dgram';
 import request from './request';
 
 interface IRequester {
-  request: (client: Socket, data: IRequest) => Promise<any>;
+  request: (client: Socket, data: IRequest) => Promise<Buffer>;
 }
 
 const Requester: IRequester = {

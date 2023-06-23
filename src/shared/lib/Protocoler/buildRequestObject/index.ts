@@ -20,3 +20,4 @@ const buildRequestObject = (type: TRequestType, totalParts: number, partNumber: 
 };
 
 export default buildRequestObject;
+export { checkAcceptedTypes };

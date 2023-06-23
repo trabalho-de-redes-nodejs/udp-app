@@ -1,8 +1,7 @@
 import { Socket } from 'dgram';
-import Printer from 'client/lib/Printer';
 import { serverAddress, serverPort } from 'config/config';
 
-const request = (client: Socket, data: IRequest): Promise<any> => {
+const request = (client: Socket, data: IRequest): Promise<Buffer> => {
   return new Promise((resolve, reject) => {
     const bytesToSend = Buffer.from(JSON.stringify(data));
 
@@ -12,8 +11,6 @@ const request = (client: Socket, data: IRequest): Promise<any> => {
       }
 
       client.on('message', (msgFromServer) => {
-        Printer.serverResponseLog(`${msgFromServer}`);
-        console.log(msgFromServer);
         resolve(msgFromServer);
       });
     });

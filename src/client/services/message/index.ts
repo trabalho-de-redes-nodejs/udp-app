@@ -1,7 +1,7 @@
 import { Socket } from 'dgram';
 import Reader from 'client/lib/Reader';
-import Protocoler from 'client/lib/Protocoler';
 import Requester from 'client/lib/Requester';
+import Protocoler from 'shared/lib/Protocoler';
 
 const sendMessage = async (client: Socket): Promise<void> => {
   try {
