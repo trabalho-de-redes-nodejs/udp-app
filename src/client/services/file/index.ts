@@ -2,12 +2,12 @@ import { Socket } from 'dgram';
 import fs from 'fs';
 import path from 'path';
 
-import { createFileWithRandomContent } from 'utils/files';
 import Reader from 'client/lib/Reader';
 import Printer from 'client/lib/Printer';
 import FileSplitter from 'client/lib/FileSplitter';
 import Protocoler from 'client/lib/Protocoler';
 import Requester from 'client/lib/Requester';
+import FileOperator from 'client/lib/FileOperator';
 
 const directory = 'src/client/input';
 
@@ -71,15 +71,7 @@ const createFileByInput = async (): Promise<string> => {
   const fileName: string = Reader.fileName('Type a file name to create:');
   const fileSize: number = Reader.integer('Type a file size to create (in bytes):', { min: 0 });
 
-  return await createFileWithRandomContent(`${directory}/${fileName}`, fileSize)
-    .then(() => {
-      return path.join(directory, fileName);
-    })
-    .catch((err: any) => {
-      console.error((err as Error)?.message || err);
-
-      return '';
-    });
+  return await FileOperator.createFile(fileName, fileSize);
 };
 
 const sendFileToServerByParts = async (client: Socket, names: string[]): Promise<void> => {

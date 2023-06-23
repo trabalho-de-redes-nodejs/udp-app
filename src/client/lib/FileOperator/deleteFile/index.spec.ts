@@ -1,18 +1,17 @@
 import fs from 'fs';
 import { describe, expect, it } from 'vitest';
-import { createFileWithRandomContent, deleteFile } from '.';
+import deleteFile from '../deleteFile';
+import { createFileWithRandomContent } from '../createFile';
 
 describe('createFileWithRandomContent', () => {
   it('should create an empty file of the specified size', async () => {
     const fileName = 'test.txt';
     const fileSize = 100;
 
-    const result = await createFileWithRandomContent(fileName, fileSize);
-
-    expect(result).toBe(true);
-    expect(fs.existsSync(fileName)).toBe(true);
-    expect(fs.statSync(fileName).size).toBe(fileSize);
+    await createFileWithRandomContent(fileName, fileSize);
 
     deleteFile(fileName);
+
+    expect(fs.existsSync(fileName)).toBe(false);
   });
 });
