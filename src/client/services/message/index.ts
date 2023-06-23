@@ -9,8 +9,8 @@ const sendMessage = async (client: Socket): Promise<void> => {
     const requestObject = Protocoler.buildRequestObject('message', 1, 1, message);
 
     await Requester.request(client, requestObject)
-      .then((response) => {
-        console.log('Response:', response);
+      .then((response: Buffer) => {
+        console.log('Response:', response.toString());
       })
       .catch((err) => {
         console.error((err as Error)?.message || err);
