@@ -71,7 +71,7 @@ const createFileByInput = async (): Promise<string> => {
   const fileName: string = Reader.fileName('Type a file name to create:');
   const fileSize: number = Reader.integer('Type a file size to create (in bytes):', { min: 0 });
 
-  return await FileOperator.createFile(fileName, fileSize);
+  return await FileOperator.createFileBySize(fileName, fileSize);
 };
 
 const sendFileToServerByParts = async (client: Socket, names: string[]): Promise<void> => {
@@ -83,7 +83,7 @@ const sendFileToServerByParts = async (client: Socket, names: string[]): Promise
 const sendFilePartToServer = async (client: Socket, name: string, index: number, total: number): Promise<void> => {
   try {
     const message: string = fs.readFileSync(name, { encoding: 'utf-8' });
-    const requestObject: IRequest = Protocoler.buildRequestObject('file', total, index, message);
+    const requestObject: IRequest = Protocoler.buildRequestObject('file', total, index, message, name);
 
     console.info(`Sending file ${name} to server...`);
 

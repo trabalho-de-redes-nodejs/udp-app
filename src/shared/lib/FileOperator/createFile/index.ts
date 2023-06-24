@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const directory = 'src/client/input';
+const clientDirectory = 'src/client/input';
 
 const createFileWithRandomContent = (fileName: string, size: number): Promise<boolean> => {
   const generateRandomString = (length: number): string => {
@@ -25,10 +25,10 @@ const createFileWithRandomContent = (fileName: string, size: number): Promise<bo
   });
 };
 
-const createFile = async (fileName: string, fileSize: number): Promise<string> => {
-  return await createFileWithRandomContent(`${directory}/${fileName}`, fileSize)
+const createFileBySize = async (fileName: string, fileSize: number): Promise<string> => {
+  return await createFileWithRandomContent(`${clientDirectory}/${fileName}`, fileSize)
     .then(() => {
-      return path.join(directory, fileName);
+      return path.join(clientDirectory, fileName);
     })
     .catch((err: any) => {
       console.error((err as Error)?.message || err);
@@ -37,6 +37,16 @@ const createFile = async (fileName: string, fileSize: number): Promise<string> =
     });
 };
 
-export default createFile;
+const createFileByInput = async (fileName: string, input: string, directory: string = clientDirectory): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(fileName, input, (error) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(path.join(directory, fileName));
+      }
+    });
+  });
+};
 
-export { createFileWithRandomContent, createFile };
+export { createFileWithRandomContent, createFileBySize, createFileByInput };

@@ -4,7 +4,7 @@ const checkAcceptedTypes = (type: TRequestType): boolean => {
   return acceptedTypes.includes(type);
 };
 
-const buildRequestObject = (type: TRequestType, totalParts: number, partNumber: number, data: string): IRequest => {
+const buildRequestObject = (type: TRequestType, totalParts: number, partNumber: number, data: string, fileName?: string): IRequest => {
   if (!checkAcceptedTypes(type)) {
     throw new Error('Invalid request type');
   }
@@ -14,6 +14,7 @@ const buildRequestObject = (type: TRequestType, totalParts: number, partNumber: 
       type,
       totalParts,
       partNumber,
+      fileName,
     },
     body: data,
   };

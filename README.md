@@ -24,10 +24,10 @@ Fluxo UDP em Node.js
 ## Lista de Tarefas
 
 0. [x] Criação da estrutura do projeto
-1. [ ] Entrega ordenada para aplicação baseado na ordem dos pacotes (# de sequência).
+1. [x] Entrega ordenada para aplicação baseado na ordem dos pacotes (# de sequência).
 2. [ ] Confirmação acumulativa (ACK acumulativo) do destinatário para o remetente.
 3. [ ] Utilização de um Buffer de pacotes de tamanho T, onde pacotes ocupam M Bytes.
-4. [ ] O tamanho de cada pacote é de, no máximo, 1024 Bytes. (M)
+4. [x] O tamanho de cada pacote é de, no máximo, 1024 Bytes. (M)
 5. [ ] Deve haver uma janela deslizante com tamanho N no buffer do remetente e do servidor. Onde N é igual a pelo menos 10 pacotes de tamanho M.
 6. [ ] Números de sequência devem ser utilizados. Eles podem ser inteiros em um total de N\*2, ou serem incrementados conforme o fluxo de bytes, como no TCP.
 7. [ ] Adicione no protocolo um controle de fluxo, onde o remetente deve saber qual o tamanho da janela N do destinatário, a fim de não afogá-lo.

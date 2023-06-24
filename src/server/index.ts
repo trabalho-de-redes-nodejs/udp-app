@@ -6,17 +6,15 @@ import Protocoler from 'shared/lib/Protocoler';
 
 const socket = dgram.createSocket('udp4');
 
-const respond = (data: IRequest, remoteInfo: dgram.RemoteInfo): string => {
-  const controller = {
-    message: () => message(data.body, remoteInfo),
-    file: () => file(data, remoteInfo),
-  };
-
-  if (controller[data.header.type]) {
-    return controller[data.header.type]();
+const respond = (data: IRequest, remoteInfo: dgram.RemoteInfo): string | number => {
+  switch (data.header.type) {
+    case 'message':
+      return message(data.body, remoteInfo);
+    case 'file':
+      return file(data, remoteInfo);
+    default:
+      throw new Error('Invalid request type');
   }
-
-  throw new Error('Invalid request type');
 };
 
 socket.bind(serverPort, serverAddress, () => {
@@ -28,7 +26,7 @@ socket.on('message', (message: string, remoteInfo: dgram.RemoteInfo) => {
     const data: IRequest = Protocoler.getRequestObject(message);
     const responseMessage = respond(data, remoteInfo);
 
-    const bytesToSend = Buffer.from(responseMessage);
+    const bytesToSend = Buffer.from(`${responseMessage}`);
     socket.send(bytesToSend, remoteInfo.port, remoteInfo.address);
   } catch (err) {
     const errorResponse = (err as Error)?.message || err;

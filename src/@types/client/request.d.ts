@@ -7,6 +7,7 @@ interface IHeader {
   type: TRequestType;
   totalParts: number;
   partNumber: number;
+  fileName?: string;
 }
 
 type TRequestType = 'file' | 'message';

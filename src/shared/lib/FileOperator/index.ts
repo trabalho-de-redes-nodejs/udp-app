@@ -1,13 +1,15 @@
-import { createFile } from './createFile';
+import { createFileByInput, createFileBySize } from './createFile';
 import deleteFile from './deleteFile';
 
 interface IFileOperator {
-  createFile: (fileName: string, fileSize: number) => Promise<string>;
+  createFileBySize: (fileName: string, fileSize: number, directory?: string) => Promise<string>;
+  createFileByInput: (fileName: string, input: string, directory?: string) => Promise<string>;
   deleteFile: (fileName: string) => Promise<boolean>;
 }
 
 const FileOperator: IFileOperator = {
-  createFile: createFile,
+  createFileBySize: createFileBySize,
+  createFileByInput: createFileByInput,
   deleteFile: deleteFile,
 };
 
