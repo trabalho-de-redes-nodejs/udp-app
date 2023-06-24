@@ -39,7 +39,9 @@ const createFileBySize = async (fileName: string, fileSize: number): Promise<str
 
 const createFileByInput = async (fileName: string, input: string, directory: string = clientDirectory): Promise<string> => {
   return new Promise((resolve, reject) => {
-    fs.writeFile(fileName, input, (error) => {
+    const filePath = path.join(directory, fileName);
+
+    fs.writeFile(filePath, input, (error) => {
       if (error) {
         reject(error);
       } else {
