@@ -1,22 +1,27 @@
 interface PipelineControl {
-  addItem: (data: string | number) => void;
-  getPipeline: () => (string | number)[];
+  addItem: (data: string) => void;
+  getPipeline: () => string[];
   getLength: () => number;
-  removeFirstItem: () => void;
+  shift: () => void;
+  getFirstItem: () => string;
 }
 
 const createPipelineControl = (): PipelineControl => {
-  const Pipeline: (string | number)[] = [];
+  const Pipeline: string[] = [];
 
-  const addItem = (data: string | number): void => {
+  const addItem = (data: string): void => {
     Pipeline.push(data);
   };
 
-  const getPipeline = (): (string | number)[] => {
+  const getFirstItem = (): string => {
+    return Pipeline[0];
+  };
+
+  const getPipeline = (): string[] => {
     return Pipeline;
   };
 
-  const removeFirstItem = (): void => {
+  const shift = (): void => {
     Pipeline.shift();
   };
 
@@ -27,8 +32,9 @@ const createPipelineControl = (): PipelineControl => {
   return {
     addItem,
     getPipeline,
-    removeFirstItem,
+    shift,
     getLength,
+    getFirstItem,
   };
 };
 

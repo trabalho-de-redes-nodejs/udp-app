@@ -40,11 +40,11 @@ const fillPipeline = async (): Promise<void> => {
 };
 
 const unpackPipeline = async (client: Socket): Promise<void> => {
-  await sendFileToServerByParts(client, pipeline.getPipeline() as string[])
+  await sendFileToServerByParts(client)
     .catch((err) => console.error(err))
     .finally(() => {
       client.close();
-      FileSplitter.deleteFilesFromArray(pipeline.getPipeline() as string[]);
+      FileSplitter.deleteFilesFromArray(pipeline.getPipeline());
     });
 };
 
@@ -86,12 +86,15 @@ const createFileByInput = async (): Promise<string> => {
   return await FileOperator.createFileBySize(fileName, fileSize);
 };
 
-const sendFileToServerByParts = async (client: Socket, names: string[]): Promise<void> => {
-  for (const name of names) {
-    await sendFilePartToServer(client, name, names.indexOf(name) + 1, names.length);
+const sendFileToServerByParts = async (client: Socket): Promise<void> => {
+  const totalParts = pipeline.getLength();
+
+  for (let partIndex = 1; partIndex <= totalParts; partIndex++) {
+    const partName = pipeline.getPipeline()[0];
+    await sendFilePartToServer(client, partName, partIndex, totalParts);
+    pipeline.shift();
   }
 };
-
 const sendFilePartToServer = async (client: Socket, name: string, index: number, total: number): Promise<void> => {
   try {
     const message: string = fs.readFileSync(name, { encoding: 'utf-8' });
