@@ -8,32 +8,44 @@ import Printer from 'client/lib/Printer';
 import Requester from 'client/lib/Requester';
 import FileSplitter from 'shared/lib/FileSplitter';
 import Protocoler from 'shared/lib/Protocoler';
+import createPipelineControl from 'client/lib/Pipeline';
 
 const directory = 'src/client/input';
+const pipeline = createPipelineControl();
 
 const sendFile = async (client: Socket): Promise<void> => {
   try {
-    const fileName: string = await chooseFileOrCreate().then((file) => file);
-    const splittedFile = await FileSplitter.splitFileBySize(fileName, 1024)
-      .then((names) => names)
-      .catch((err) => {
-        console.error((err as Error)?.message || err);
-        return [];
-      });
-
-    if (!splittedFile || splittedFile === undefined || (splittedFile as string[]).length === 0) {
-      return;
-    }
-
-    await sendFileToServerByParts(client, splittedFile as string[])
-      .catch((err) => console.error(err))
-      .finally(() => {
-        client.close();
-        FileSplitter.deleteFilesFromArray(splittedFile as string[]);
-      });
+    await fillPipeline();
+    await unpackPipeline(client);
   } catch (err) {
     console.error((err as Error)?.message || err);
   }
+};
+
+const fillPipeline = async (): Promise<void> => {
+  const fileName: string = await chooseFileOrCreate().then((file) => file);
+
+  const splittedFile = await FileSplitter.splitFileBySize(fileName, 1024)
+    .then((names) => names)
+    .catch((err) => {
+      console.error((err as Error)?.message || err);
+      return [];
+    });
+
+  if (!splittedFile || splittedFile === undefined || (splittedFile as string[]).length === 0) {
+    return;
+  }
+
+  (splittedFile as string[]).forEach((file) => pipeline.addItem(file));
+};
+
+const unpackPipeline = async (client: Socket): Promise<void> => {
+  await sendFileToServerByParts(client, pipeline.getPipeline() as string[])
+    .catch((err) => console.error(err))
+    .finally(() => {
+      client.close();
+      FileSplitter.deleteFilesFromArray(pipeline.getPipeline() as string[]);
+    });
 };
 
 const chooseFileOrCreate = async (): Promise<string> => {
