@@ -38,16 +38,21 @@ Fluxo UDP em Node.js
 
 ## To-do
 
-0. [x] Estrutura cliente/servidor para envio de mensagens
-1. [x] No cliente, dividir o arquivo em várias parte de tamanho N(min 10) de 1024 bytes
-2. [x] No cliente, enviar cada parte para o servidor com cabeçalho
-3. [x] No servidor, receber cada parte do arquivo e criar um buffer de tamanho N
-4. [x] (async) No servidor, montar o arquivo com os dados do Buffer
-5. [ ] No cliente, fazer o controle de erro e enviar o chunk com erro novamente
-6. [ ] No servidor, enviar a chave de integridade do arquivo montado
-7. [ ] (async) No cliente, fazer a verificação de integridade do arquivo montado
-8. [ ] No cliente, se tiver errado, fale que foi erro e aparece a mensagem para enviar novamente
-9. [ ] To Do
+0.0 [x] Estrutura cliente/servidor para envio de mensagens
+1.0 [x] No cliente, dividir o arquivo em várias parte de tamanho N(min 10) de 1024 bytes
+2.0 [x] No cliente, enviar cada parte para o servidor com cabeçalho
+3.0 [x] No servidor, receber cada parte do arquivo e criar um buffer de tamanho N
+4.0 [x] (async) No servidor, montar o arquivo com os dados do Buffer
+4.1 [ ] No cliente e servidor, realizar a operação de 3 way handshake com SYN e FYN
+6.0 [ ] No cliente, fazer o controle de erro e enviar o chunk com erro novamente
+6.1 [ ] No servidor, enviar a chave de integridade do arquivo montado
+6.2 [ ] (async) No cliente, fazer a verificação de integridade do arquivo montado (adicionando o md5 no head da aplicação)
+6.3 [ ] No cliente, se tiver errado, fale que foi erro e aparece a mensagem para enviar novamente
+7.0 [ ] No servidor, fazer um controle de pacotes
+7.1 [ ] No cliente, colocar para enviar outro pacote caso tenha espaço no servidor (Recomendo criar uma lib Tranferor, que fará o controle do unpackPipeline, recebendo um pipeline cheio)
+7.2 [ ] No cliente, criar uma variável ack para saber qual pacote enviar
+8.0 [ ] No cliente, criar variábel de sshtresh e adicionar um estado de Slow Start e Congetion avoidance no Tranferor
+9.0 [ ] No cliente e servidor, colocar um temporizador para salvar em um vetor os logs para criar o relatório
 
 ## Referência da API
 
