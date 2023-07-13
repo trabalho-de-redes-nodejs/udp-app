@@ -16,7 +16,8 @@ const pipeline = createPipelineControl();
 const sendFile = async (client: Socket): Promise<void> => {
   try {
     await fillPipeline();
-    await unpackPipeline(client);
+    await establishConnection(client);
+    // await unpackPipeline(client);
   } catch (err) {
     console.error((err as Error)?.message || err);
   }
@@ -37,6 +38,25 @@ const fillPipeline = async (): Promise<void> => {
   }
 
   (splittedFile as string[]).forEach((file) => pipeline.addItem(file));
+};
+
+const establishConnection = async (client: Socket): Promise<void> => {
+  try {
+    const seq = 0;
+    const ack = 0;
+
+    const firstWay: IRequest = Protocoler.buildRequestObject(seq, ack, '', 'SYN');
+
+    await Requester.request(client, firstWay)
+      .then((response: Buffer) => {
+        console.log('Response:', response.toString());
+      })
+      .catch((err) => {
+        console.error((err as Error)?.message || err);
+      });
+  } catch (err) {
+    console.error('Error sending file to server:', err);
+  }
 };
 
 const unpackPipeline = async (client: Socket): Promise<void> => {
@@ -87,18 +107,19 @@ const createFileByInput = async (): Promise<string> => {
 };
 
 const sendFileToServerByParts = async (client: Socket): Promise<void> => {
-  const totalParts = pipeline.getLength();
+  const seq = pipeline.getLength();
 
-  for (let partIndex = 1; partIndex <= totalParts; partIndex++) {
+  for (let partIndex = 1; partIndex <= seq; partIndex++) {
     const partName = pipeline.getPipeline()[0];
-    await sendFilePartToServer(client, partName, partIndex, totalParts);
+    await sendFilePartToServer(client, partName, partIndex, seq);
     pipeline.shift();
   }
 };
+
 const sendFilePartToServer = async (client: Socket, name: string, index: number, total: number): Promise<void> => {
   try {
     const message: string = fs.readFileSync(name, { encoding: 'utf-8' });
-    const requestObject: IRequest = Protocoler.buildRequestObject('file', total, index, message, name);
+    const requestObject: IRequest = Protocoler.buildRequestObject(total, index, message, 'ACK', 'file', name);
 
     console.info(`Sending file ${name} to server...`);
 

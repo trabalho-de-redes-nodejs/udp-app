@@ -6,8 +6,8 @@ describe('verifyRequest', () => {
     const validRequest = {
       header: {
         type: 'file',
-        totalParts: 3,
-        partNumber: 1,
+        seq: 3,
+        ack: 1,
       },
       body: 'Sample body',
     };

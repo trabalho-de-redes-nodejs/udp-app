@@ -4,19 +4,30 @@ const checkAcceptedTypes = (type: TRequestType): boolean => {
   return acceptedTypes.includes(type);
 };
 
-const buildRequestObject = (type: TRequestType, totalParts: number, partNumber: number, data: string, fileName?: string): IRequest => {
-  if (!checkAcceptedTypes(type)) {
+const buildRequestObject = (
+  seq: number,
+  ack: number,
+  data: string,
+  flag?: 'SYN' | 'FYN' | 'ACK',
+  type?: TRequestType,
+  fileName?: string
+): IRequest => {
+  if (type && !checkAcceptedTypes(type)) {
     throw new Error('Invalid request type');
   }
 
   return {
     header: {
+      seq,
+      ack,
+      syn: flag === 'SYN',
+      fyn: flag === 'FYN',
+    },
+    body: {
+      data,
       type,
-      totalParts,
-      partNumber,
       fileName,
     },
-    body: data,
   };
 };
 

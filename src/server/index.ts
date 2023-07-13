@@ -23,7 +23,13 @@ socket.bind(serverPort, serverAddress, () => {
 
 socket.on('message', (message: string, remoteInfo: dgram.RemoteInfo) => {
   try {
+    console.log(JSON.parse(message));
     const data: IRequest = Protocoler.getRequestObject(message);
+
+    if (!data) {
+      throw data;
+    }
+
     const responseMessage = respond(data, remoteInfo);
 
     const bytesToSend = Buffer.from(`${responseMessage}`);

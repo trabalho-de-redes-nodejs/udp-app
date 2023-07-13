@@ -18,11 +18,11 @@ const buildFile = (): void => {
 };
 
 const file = (data: IRequest, remoteInfo: dgram.RemoteInfo) => {
-  console.log(`File ${data.header.partNumber} of ${data.header.totalParts} received from ${remoteInfo.address}:${remoteInfo.port}`);
+  console.log(`File ${data.header.ack} of ${data.header.seq} received from ${remoteInfo.address}:${remoteInfo.port}`);
 
   buffer.addBuffer(data.body);
 
-  if (buffer.getLength() === data.header.totalParts) {
+  if (buffer.getLength() === data.header.seq) {
     buildFile();
     return 'File received';
   }
