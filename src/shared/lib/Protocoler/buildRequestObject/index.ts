@@ -5,7 +5,7 @@ const checkAcceptedTypes = (type: TRequestType): boolean => {
 };
 
 const buildRequestObject = (
-  seq: number,
+  seq?: number,
   ack: number,
   data: string,
   flag?: 'SYN' | 'FYN' | 'ACK',

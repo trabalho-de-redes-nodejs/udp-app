@@ -18,9 +18,10 @@ const buildFile = (): void => {
 };
 
 const file = (data: IRequest, remoteInfo: dgram.RemoteInfo) => {
-  console.log(`File ${data.header.ack} of ${data.header.seq} received from ${remoteInfo.address}:${remoteInfo.port}`);
+  //   console.log(`File ${data.header.seq} of ${data.header.ack} received from ${remoteInfo.address}:${remoteInfo.port}`);
+  console.log(`Sequence ${data.header.seq}. Waiting ${data.header.ack}.From ${remoteInfo.address}:${remoteInfo.port}`);
 
-  buffer.addBuffer(data.body);
+  buffer.addBuffer(data.body.data);
 
   if (buffer.getLength() === data.header.seq) {
     buildFile();

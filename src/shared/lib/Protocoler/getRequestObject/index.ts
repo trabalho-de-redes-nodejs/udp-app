@@ -7,7 +7,7 @@ const verifyRequest = (request: any): boolean => {
 
   const header = request?.header;
 
-  if (!header?.type || !header?.seq || !header?.ack) {
+  if (header.seq === null || header.ack === null) {
     return false;
   }
 
@@ -21,21 +21,18 @@ const getRequestObject = (data: string): IRequest => {
     }
 
     const request: IRequest = JSON.parse(data);
-    const { type, seq, ack } = request.header;
+    const { seq, ack } = request.header;
+    const { type } = request.body;
 
-    if (!type) {
+    if (type && !checkAcceptedTypes(type)) {
       throw new Error('Invalid request type');
     }
 
-    if (!checkAcceptedTypes(type)) {
-      throw new Error('Invalid request type');
-    }
-
-    if (seq < 1) {
+    if (seq < 0) {
       throw new Error('Invalid total parts');
     }
 
-    if (ack < 1 || ack > seq) {
+    if (ack < 0 || ack < seq) {
       throw new Error('Invalid part number');
     }
 

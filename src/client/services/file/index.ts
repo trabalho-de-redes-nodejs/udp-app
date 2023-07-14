@@ -12,6 +12,7 @@ import createPipelineControl from 'client/lib/Pipeline';
 
 const directory = 'src/client/input';
 const pipeline = createPipelineControl();
+let seqClient: number, seqServer: number, ackClient: number, ackServer: number;
 
 const sendFile = async (client: Socket): Promise<void> => {
   try {
@@ -40,16 +41,25 @@ const fillPipeline = async (): Promise<void> => {
   (splittedFile as string[]).forEach((file) => pipeline.addItem(file));
 };
 
-const establishConnection = async (client: Socket): Promise<void> => {
+const firstWay = async (client: Socket): Promise<void> => {
   try {
-    const seq = 0;
-    const ack = 0;
+    seqClient = 0;
+    ackClient = 0;
 
-    const firstWay: IRequest = Protocoler.buildRequestObject(seq, ack, '', 'SYN');
+    const firstWay: IRequest = Protocoler.buildRequestObject(seqClient, ackClient, '', 'SYN');
 
     await Requester.request(client, firstWay)
-      .then((response: Buffer) => {
-        console.log('Response:', response.toString());
+      .then((response: string) => {
+        const responseJSON = JSON.parse(response);
+
+        seqServer = responseJSON.header.seq;
+        ackServer = responseJSON.header.ack;
+
+        // console.log('First Way');
+        // console.log('Seq Cliente: ', seqClient);
+        // console.log('Ack Cliente: ', ackClient);
+        // console.log('Seq Servidor: ', seqServer);
+        // console.log('Ack Servidor: ', ackServer);
       })
       .catch((err) => {
         console.error((err as Error)?.message || err);
@@ -57,6 +67,34 @@ const establishConnection = async (client: Socket): Promise<void> => {
   } catch (err) {
     console.error('Error sending file to server:', err);
   }
+};
+
+const thirdWay = async (client: Socket): Promise<void> => {
+  try {
+    ackClient = seqServer + 1;
+    const thirdWay: IRequest = Protocoler.buildRequestObject(seqClient, ackClient, '', 'ACK');
+
+    await Requester.request(client, thirdWay)
+      .then(() => {
+        console.log('Establish connection!');
+
+        // console.log('Third Way');
+        // console.log('Seq Cliente: ', seqClient);
+        // console.log('Ack Cliente: ', ackClient);
+        // console.log('Seq Servidor: ', seqServer);
+        // console.log('Ack Servidor: ', ackServer);
+      })
+      .catch((err) => {
+        console.error((err as Error)?.message || err);
+      });
+  } catch (err) {
+    console.error('Error sending file to server:', err);
+  }
+};
+
+const establishConnection = async (client: Socket): Promise<void> => {
+  await firstWay(client);
+  await thirdWay(client);
 };
 
 const unpackPipeline = async (client: Socket): Promise<void> => {
