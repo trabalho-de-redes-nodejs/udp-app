@@ -3,13 +3,6 @@ interface IRequest {
   body: IBody;
 }
 
-interface IHeader {
-  seq: number;
-  ack: number;
-  syn?: boolean;
-  fyn?: boolean;
-}
-
 interface IBody {
   type?: TRequestType;
   fileName?: string;

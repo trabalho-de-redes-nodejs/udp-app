@@ -5,19 +5,21 @@ import path from 'path';
 import FileOperator from 'shared/lib/FileOperator';
 import Reader from 'client/lib/Reader';
 import Printer from 'client/lib/Printer';
-import Requester from 'client/lib/Requester';
 import FileSplitter from 'shared/lib/FileSplitter';
-import Protocoler from 'shared/lib/Protocoler';
 import createPipelineControl from 'client/lib/Pipeline';
+import Transferor from 'client/lib/Transferor';
 
 const directory = 'src/client/input';
 const pipeline = createPipelineControl();
-let seqClient: number, seqServer: number, ackClient: number, ackServer: number;
 
 const sendFile = async (client: Socket): Promise<void> => {
   try {
     await fillPipeline();
-    await establishConnection(client);
+
+    const transferor = Transferor(pipeline, client);
+
+    await transferor.send();
+
     // await unpackPipeline(client);
   } catch (err) {
     console.error((err as Error)?.message || err);
@@ -39,71 +41,6 @@ const fillPipeline = async (): Promise<void> => {
   }
 
   (splittedFile as string[]).forEach((file) => pipeline.addItem(file));
-};
-
-const firstWay = async (client: Socket): Promise<void> => {
-  try {
-    seqClient = 0;
-    ackClient = 0;
-
-    const firstWay: IRequest = Protocoler.buildRequestObject(seqClient, ackClient, '', 'SYN');
-
-    await Requester.request(client, firstWay)
-      .then((response: string) => {
-        const responseJSON = JSON.parse(response);
-
-        seqServer = responseJSON.header.seq;
-        ackServer = responseJSON.header.ack;
-
-        // console.log('First Way');
-        // console.log('Seq Cliente: ', seqClient);
-        // console.log('Ack Cliente: ', ackClient);
-        // console.log('Seq Servidor: ', seqServer);
-        // console.log('Ack Servidor: ', ackServer);
-      })
-      .catch((err) => {
-        console.error((err as Error)?.message || err);
-      });
-  } catch (err) {
-    console.error('Error sending file to server:', err);
-  }
-};
-
-const thirdWay = async (client: Socket): Promise<void> => {
-  try {
-    ackClient = seqServer + 1;
-    const thirdWay: IRequest = Protocoler.buildRequestObject(seqClient, ackClient, '', 'ACK');
-
-    await Requester.request(client, thirdWay)
-      .then(() => {
-        console.log('Establish connection!');
-
-        // console.log('Third Way');
-        // console.log('Seq Cliente: ', seqClient);
-        // console.log('Ack Cliente: ', ackClient);
-        // console.log('Seq Servidor: ', seqServer);
-        // console.log('Ack Servidor: ', ackServer);
-      })
-      .catch((err) => {
-        console.error((err as Error)?.message || err);
-      });
-  } catch (err) {
-    console.error('Error sending file to server:', err);
-  }
-};
-
-const establishConnection = async (client: Socket): Promise<void> => {
-  await firstWay(client);
-  await thirdWay(client);
-};
-
-const unpackPipeline = async (client: Socket): Promise<void> => {
-  await sendFileToServerByParts(client)
-    .catch((err) => console.error(err))
-    .finally(() => {
-      client.close();
-      FileSplitter.deleteFilesFromArray(pipeline.getPipeline());
-    });
 };
 
 const chooseFileOrCreate = async (): Promise<string> => {
@@ -142,35 +79,6 @@ const createFileByInput = async (): Promise<string> => {
   const fileSize: number = Reader.integer('Type a file size to create (in bytes):', { min: 0 });
 
   return await FileOperator.createFileBySize(fileName, fileSize);
-};
-
-const sendFileToServerByParts = async (client: Socket): Promise<void> => {
-  const seq = pipeline.getLength();
-
-  for (let partIndex = 1; partIndex <= seq; partIndex++) {
-    const partName = pipeline.getPipeline()[0];
-    await sendFilePartToServer(client, partName, partIndex, seq);
-    pipeline.shift();
-  }
-};
-
-const sendFilePartToServer = async (client: Socket, name: string, index: number, total: number): Promise<void> => {
-  try {
-    const message: string = fs.readFileSync(name, { encoding: 'utf-8' });
-    const requestObject: IRequest = Protocoler.buildRequestObject(total, index, message, 'ACK', 'file', name);
-
-    console.info(`Sending file ${name} to server...`);
-
-    await Requester.request(client, requestObject)
-      .then((response: Buffer) => {
-        console.log('Response:', response.toString());
-      })
-      .catch((err) => {
-        console.error((err as Error)?.message || err);
-      });
-  } catch (err) {
-    console.error('Error sending file to server:', err);
-  }
 };
 
 export { sendFile };
