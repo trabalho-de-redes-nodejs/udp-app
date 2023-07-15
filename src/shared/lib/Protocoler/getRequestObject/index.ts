@@ -32,7 +32,7 @@ const getRequestObject = (data: string): IRequest => {
       throw new Error('Invalid total parts');
     }
 
-    if (ack < 0 || ack < seq) {
+    if (ack < 0) {
       throw new Error('Invalid part number');
     }
 

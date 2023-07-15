@@ -27,6 +27,12 @@ const establishConnection = async (data: IRequest, remoteInfo: dgram.RemoteInfo)
   socket.send(responseMessage, remoteInfo.port, remoteInfo.address);
 };
 
+const responseAckAndAddBuffer = async (data: IRequest, remoteInfo: dgram.RemoteInfo): Promise<void> => {
+  receiver = Receiver(data.header.seq, data.header.ack, data.header.windowSize, data.header.maximumSegmentSize);
+  const responseMessage: string = await receiver.createSinalAckAndAddBuffer(data.body.data);
+  socket.send(responseMessage, remoteInfo.port, remoteInfo.address);
+};
+
 socket.on('message', (message: string, remoteInfo: dgram.RemoteInfo) => {
   try {
     const data: IRequest = Protocoler.getRequestObject(message);
@@ -40,9 +46,10 @@ socket.on('message', (message: string, remoteInfo: dgram.RemoteInfo) => {
       return;
     }
 
-    const responseMessage = respond(data, remoteInfo);
-    const bytesToSend = Buffer.from(`${responseMessage}`);
-    socket.send(bytesToSend, remoteInfo.port, remoteInfo.address);
+    responseAckAndAddBuffer(data, remoteInfo);
+
+    // const bytesToSend = Buffer.from(`${responseMessage}`);
+    // socket.send(bytesToSend, remoteInfo.port, remoteInfo.address);
   } catch (err) {
     const errorResponse = (err as Error)?.message || err;
     console.error(errorResponse);

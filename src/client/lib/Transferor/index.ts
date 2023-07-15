@@ -21,7 +21,7 @@ const Transferor = (pipeline: PipelineControl, clientSocket: Socket): ITransfero
 
   const send = async (): Promise<void> => {
     await establishConnection();
-    // await unpackPipeline();
+    await unpackPipeline();
   };
 
   const establishConnection = async (): Promise<void> => {
@@ -32,7 +32,7 @@ const Transferor = (pipeline: PipelineControl, clientSocket: Socket): ITransfero
         const responseJSON: IResponse = JSON.parse(response);
 
         seq = responseJSON.header.seq;
-        ack = responseJSON.header.seq + 1;
+        ack = responseJSON.header.seq + maximumSegmentSize;
       })
       .catch((err) => {
         console.error((err as Error)?.message || err);
@@ -40,34 +40,38 @@ const Transferor = (pipeline: PipelineControl, clientSocket: Socket): ITransfero
   };
 
   const unpackPipeline = async (): Promise<void> => {
-    await sendFileToServerByParts(client)
+    await sendFileToServerByParts()
       .catch((err) => console.error(err))
       .finally(() => {
         client.close();
-        FileSplitter.deleteFilesFromArray(pipeline.getPipeline());
+        // FileSplitter.deleteFilesFromArray(pipeline.getPipeline());
       });
   };
 
   const sendFileToServerByParts = async (): Promise<void> => {
-    const seq = pipeline.getLength();
+    let numberPackage = 0;
+    while (seq < buffer.getLength()) {
+      //   console.log(seq, ' ', ack);
+      const data = buffer.getDataByStartByteAndEndByte(seq, ack);
 
-    for (let partIndex = 1; partIndex <= seq; partIndex++) {
-      const partName = pipeline.getPipeline()[0];
-      await sendFilePartToServer(client, partName, partIndex, seq);
-      pipeline.shift();
+      numberPackage++;
+      await sendFilePartToServer(data, numberPackage);
     }
   };
 
-  const sendFilePartToServer = async (name: string, index: number, total: number): Promise<void> => {
+  const sendFilePartToServer = async (data: string, numberPackage: number): Promise<void> => {
     try {
-      const message: string = fs.readFileSync(name, { encoding: 'utf-8' });
-      const requestObject: IRequest = Protocoler.buildRequestObject(total, index, message, 'ACK', 'file', name);
+      const requestObject: IRequest = Protocoler.buildRequestObject(getTcpHeader(), data, 'ACK');
 
-      console.info(`Sending file ${name} to server...`);
+      console.info(`Sending to server package ${numberPackage}...`);
 
       await Requester.request(client, requestObject)
         .then((response: Buffer) => {
           console.log('Response:', response.toString());
+          const responseJSON = JSON.parse(response.toString());
+
+          seq = responseJSON.header.ack;
+          //   ack = responseJSON.header.seq;
         })
         .catch((err) => {
           console.error((err as Error)?.message || err);

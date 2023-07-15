@@ -7,8 +7,8 @@ import FileSplitter from 'shared/lib/FileSplitter';
 
 const Receiver = (clientSeq: number, clientAck: number, clientWindowSize: number, clientMSS: number): IReceiver => {
   const buffer: BufferControl = createBufferControl();
-  const ack = clientSeq + 1;
-  const seq = clientAck;
+  let ack = clientSeq + 1;
+  let seq = clientAck;
   const maximumSegmentSize = clientMSS;
   const windowSize = clientWindowSize;
 
@@ -20,12 +20,27 @@ const Receiver = (clientSeq: number, clientAck: number, clientWindowSize: number
     return connectionResponseToString;
   };
 
+  const createSinalAckAndAddBuffer = async (data: string): Promise<string> => {
+    ack = clientSeq + clientMSS;
+    seq = ack - clientMSS;
+
+    buffer.addBuffer(data);
+
+    const connectionResponse: IRequest = Protocoler.buildRequestObject(getTcpHeader(), '', 'ACK');
+    const connectionResponseToString = JSON.stringify(connectionResponse);
+    return connectionResponseToString;
+  };
+
   const printData = (): void => {
     console.log('Receiver');
     console.log('seq: ', seq);
     console.log('ack: ', ack);
     console.log('windowSize: ', windowSize);
     console.log('maximumSegmentSize: ', maximumSegmentSize);
+  };
+
+  const getBuffer = async (): Promise<BufferControl> => {
+    return buffer;
   };
 
   const getTcpHeader = (): ITcpHeader => {
@@ -37,7 +52,7 @@ const Receiver = (clientSeq: number, clientAck: number, clientWindowSize: number
     };
   };
 
-  return { establishConnection, printData };
+  return { establishConnection, printData, createSinalAckAndAddBuffer, getBuffer };
 };
 
 export default Receiver;
