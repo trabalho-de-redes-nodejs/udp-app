@@ -5,8 +5,7 @@ const checkAcceptedTypes = (type: TRequestType): boolean => {
 };
 
 const buildRequestObject = (
-  seq?: number,
-  ack: number,
+  header: ITcpHeader,
   data: string,
   flag?: 'SYN' | 'FYN' | 'ACK',
   type?: TRequestType,
@@ -18,8 +17,10 @@ const buildRequestObject = (
 
   return {
     header: {
-      seq,
-      ack,
+      seq: header.seq,
+      ack: header.ack,
+      windowSize: header.windowSize,
+      maximumSegmentSize: header.maximumSegmentSize,
       syn: flag === 'SYN',
       fyn: flag === 'FYN',
     },

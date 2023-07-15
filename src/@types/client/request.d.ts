@@ -9,4 +9,11 @@ interface IBody {
   data: string;
 }
 
+interface ITcpHeader {
+  ack: number;
+  seq: number;
+  windowSize: number;
+  maximumSegmentSize: number;
+}
+
 type TRequestType = 'file' | 'message';

@@ -1,18 +1,11 @@
 import dgram, { Socket } from 'dgram';
 import Reader from './lib/Reader';
 import Printer from './lib/Printer';
-import { sendMessage } from './services/message';
 import { sendFile } from './services/file';
 
 const client: Socket = dgram.createSocket('udp4');
 
 const menu: INavigation[] = [
-  {
-    title: 'Send a String to the Server',
-    run: async (client: Socket) => {
-      await sendMessage(client);
-    },
-  },
   {
     title: 'Send a File to the Server',
     run: async (client: Socket) => {

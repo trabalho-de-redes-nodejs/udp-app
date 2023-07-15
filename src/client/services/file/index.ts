@@ -5,20 +5,20 @@ import path from 'path';
 import FileOperator from 'shared/lib/FileOperator';
 import Reader from 'client/lib/Reader';
 import Printer from 'client/lib/Printer';
-import FileSplitter from 'shared/lib/FileSplitter';
 import createPipelineControl from 'client/lib/Pipeline';
 import Transferor from 'client/lib/Transferor';
 
 const directory = 'src/client/input';
-const pipeline = createPipelineControl();
 
 const sendFile = async (client: Socket): Promise<void> => {
   try {
-    await fillPipeline();
+    const pipeline = await getPipeline();
 
     const transferor = Transferor(pipeline, client);
 
     await transferor.send();
+
+    transferor.printData();
 
     // await unpackPipeline(client);
   } catch (err) {
@@ -26,21 +26,12 @@ const sendFile = async (client: Socket): Promise<void> => {
   }
 };
 
-const fillPipeline = async (): Promise<void> => {
+const getPipeline = async (): Promise<PipelineControl> => {
   const fileName: string = await chooseFileOrCreate().then((file) => file);
 
-  const splittedFile = await FileSplitter.splitFileBySize(fileName, 1024)
-    .then((names) => names)
-    .catch((err) => {
-      console.error((err as Error)?.message || err);
-      return [];
-    });
+  const fileData: string = fs.readFileSync(fileName).toString();
 
-  if (!splittedFile || splittedFile === undefined || (splittedFile as string[]).length === 0) {
-    return;
-  }
-
-  (splittedFile as string[]).forEach((file) => pipeline.addItem(file));
+  return createPipelineControl(fileData);
 };
 
 const chooseFileOrCreate = async (): Promise<string> => {

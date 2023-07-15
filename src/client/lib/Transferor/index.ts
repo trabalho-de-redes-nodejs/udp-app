@@ -6,19 +6,17 @@ import FileSplitter from 'shared/lib/FileSplitter';
 
 interface ITransferor {
   send(): Promise<void>;
+  printData(): void;
 }
 
 const Transferor = (pipeline: PipelineControl, clientSocket: Socket): ITransferor => {
   const buffer: PipelineControl = pipeline;
   const client = clientSocket;
-  const ack = 0;
-  const seq = 0;
+
+  let ack = 0;
+  let seq = 0;
   const windowSize = pipeline.getLength();
   const maximumSegmentSize = 1024;
-  const server = {
-    ack: 0,
-    seq: 0,
-  };
 
   const send = async (): Promise<void> => {
     await establishConnection();
@@ -26,20 +24,20 @@ const Transferor = (pipeline: PipelineControl, clientSocket: Socket): ITransfero
   };
 
   const establishConnection = async (): Promise<void> => {
-    const firstWay: IRequest = Protocoler.buildRequestObject(seq, ack, '', 'SYN');
+    const firstWay: IRequest = Protocoler.buildRequestObject(getTcpHeader(), '', 'SYN');
 
     await Requester.request(client, firstWay)
       .then((response: string) => {
         const responseJSON: IResponse = JSON.parse(response);
 
-        server.seq = responseJSON.header.seq;
-        server.ack = responseJSON.header.ack;
+        seq = responseJSON.header.ack;
+        ack = responseJSON.header.seq + 1;
 
-        console.log('First Way');
-        console.log('Seq Cliente: ', seq);
-        console.log('Ack Cliente: ', ack);
-        console.log('Seq Servidor: ', server.seq);
-        console.log('Ack Servidor: ', server.ack);
+        // console.log('First Way');
+        // console.log('Seq Cliente: ', seq);
+        // console.log('Ack Cliente: ', ack);
+        // console.log('Seq Servidor: ', server.seq);
+        // console.log('Ack Servidor: ', server.ack);
       })
       .catch((err) => {
         console.error((err as Error)?.message || err);
@@ -84,7 +82,21 @@ const Transferor = (pipeline: PipelineControl, clientSocket: Socket): ITransfero
     }
   };
 
-  return { send };
+  const getTcpHeader = (): ITcpHeader => {
+    return {
+      ack,
+      seq,
+      windowSize,
+      maximumSegmentSize,
+    };
+  };
+
+  const printData = (): void => {
+    console.log('Seq Cliente: ', seq);
+    console.log('Ack Cliente: ', ack);
+  };
+
+  return { send, printData };
 };
 
 export default Transferor;

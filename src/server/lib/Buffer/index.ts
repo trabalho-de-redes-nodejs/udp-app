@@ -1,23 +1,16 @@
-interface BufferControl {
-  addBuffer: (data: string) => void;
-  getBuffer: () => string[];
-  getLength: () => number;
-  clearBuffer: () => void;
-}
-
-const createBufferControl = (windowSize: number): BufferControl => {
-  const buffer: string[] = new Array(windowSize);
+const createBufferControl = (): BufferControl => {
+  let buffer = '';
 
   const addBuffer = (data: string): void => {
-    buffer.push(data);
+    buffer += data;
   };
 
-  const getBuffer = (): string[] => {
+  const getBuffer = (): string => {
     return buffer;
   };
 
   const clearBuffer = (): void => {
-    buffer.length = 0;
+    buffer = '';
   };
 
   const getLength = (): number => {
