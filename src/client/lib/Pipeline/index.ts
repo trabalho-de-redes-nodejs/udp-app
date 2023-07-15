@@ -1,32 +1,22 @@
-const createPipelineControl = (): PipelineControl => {
-  const Pipeline: string[] = [];
+const createPipelineControl = (data: string): PipelineControl => {
+  const Pipeline = data;
 
-  const addItem = (data: string): void => {
-    Pipeline.push(data);
-  };
-
-  const getFirstItem = (): string => {
-    return Pipeline[0];
-  };
-
-  const getPipeline = (): string[] => {
+  const getPipeline = (): string => {
     return Pipeline;
-  };
-
-  const shift = (): void => {
-    Pipeline.shift();
   };
 
   const getLength = (): number => {
     return Pipeline.length;
   };
 
+  const getDataByStartByteAndEndByte = (startByte: number, endByte: number): string => {
+    return Pipeline.slice(startByte, endByte);
+  };
+
   return {
-    addItem,
     getPipeline,
-    shift,
     getLength,
-    getFirstItem,
+    getDataByStartByteAndEndByte,
   };
 };
 

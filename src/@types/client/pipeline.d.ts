@@ -1,7 +1,5 @@
 interface PipelineControl {
-  addItem: (data: string) => void;
-  getPipeline: () => string[];
+  getPipeline: () => string;
   getLength: () => number;
-  shift: () => void;
-  getFirstItem: () => string;
+  getDataByStartByteAndEndByte: (startByte: number, endByte: number) => string;
 }
