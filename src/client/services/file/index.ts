@@ -15,10 +15,11 @@ const sendFile = async (client: Socket): Promise<void> => {
     const pipeline = await getPipeline();
 
     const transferor = Transferor(pipeline, client);
+    console.log('Established connection!');
 
     await transferor.send();
 
-    transferor.printData();
+    // transferor.printData();
 
     // await unpackPipeline(client);
   } catch (err) {

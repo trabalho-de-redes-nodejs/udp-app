@@ -3,6 +3,7 @@ import fs from 'fs';
 import Protocoler from 'shared/lib/Protocoler';
 import Requester from 'client/lib/Requester';
 import FileSplitter from 'shared/lib/FileSplitter';
+import { bufferSize } from 'config/config';
 
 interface ITransferor {
   send(): Promise<void>;
@@ -16,7 +17,7 @@ const Transferor = (pipeline: PipelineControl, clientSocket: Socket): ITransfero
   let ack = 0;
   let seq = 0;
   const windowSize = pipeline.getLength();
-  const maximumSegmentSize = 1024;
+  const maximumSegmentSize = bufferSize;
 
   const send = async (): Promise<void> => {
     await establishConnection();
@@ -30,14 +31,8 @@ const Transferor = (pipeline: PipelineControl, clientSocket: Socket): ITransfero
       .then((response: string) => {
         const responseJSON: IResponse = JSON.parse(response);
 
-        seq = responseJSON.header.ack;
+        seq = responseJSON.header.seq;
         ack = responseJSON.header.seq + 1;
-
-        // console.log('First Way');
-        // console.log('Seq Cliente: ', seq);
-        // console.log('Ack Cliente: ', ack);
-        // console.log('Seq Servidor: ', server.seq);
-        // console.log('Ack Servidor: ', server.ack);
       })
       .catch((err) => {
         console.error((err as Error)?.message || err);

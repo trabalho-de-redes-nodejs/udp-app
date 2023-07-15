@@ -17,7 +17,6 @@ const Receiver = (clientSeq: number, clientAck: number, clientWindowSize: number
 
     const connectionResponseToString = JSON.stringify(connectionResponse);
 
-    printData();
     return connectionResponseToString;
   };
 

@@ -24,7 +24,6 @@ socket.bind(serverPort, serverAddress, () => {
 const establishConnection = async (data: IRequest, remoteInfo: dgram.RemoteInfo): Promise<void> => {
   receiver = Receiver(data.header.seq, data.header.ack, data.header.windowSize, data.header.maximumSegmentSize);
   const responseMessage = await receiver.establishConnection();
-
   socket.send(responseMessage, remoteInfo.port, remoteInfo.address);
 };
 
