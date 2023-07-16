@@ -28,11 +28,13 @@ const sendFile = async (client: Socket): Promise<void> => {
 };
 
 const getPipeline = async (): Promise<PipelineControl> => {
-  const fileName: string = await chooseFileOrCreate().then((file) => file);
+  const filePath: string = await chooseFileOrCreate().then((file) => file);
 
-  const fileData: string = fs.readFileSync(fileName).toString();
+  const fileData: string = fs.readFileSync(filePath).toString();
 
-  return createPipelineControl(fileData);
+  const fileName: string = path.basename(filePath);
+
+  return createPipelineControl(fileData, fileName);
 };
 
 const chooseFileOrCreate = async (): Promise<string> => {

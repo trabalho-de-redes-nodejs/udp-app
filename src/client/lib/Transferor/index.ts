@@ -20,6 +20,7 @@ const Transferor = (pipeline: PipelineControl, clientSocket: Socket): ITransfero
   const send = async (): Promise<void> => {
     await establishConnection();
     await unpackPipeline();
+    await finishConnection();
   };
 
   const establishConnection = async (): Promise<void> => {
@@ -38,44 +39,50 @@ const Transferor = (pipeline: PipelineControl, clientSocket: Socket): ITransfero
   };
 
   const unpackPipeline = async (): Promise<void> => {
-    await sendFileToServerByParts()
-      .catch((err) => console.error(err))
+    const sendFileToServerByParts = async (): Promise<void> => {
+      for (let numberPackage = 0; seq < buffer.getLength(); numberPackage++) {
+        console.info(`Sending to server package ${numberPackage}...`);
+
+        printData();
+        const data = buffer.getDataByStartByteAndEndByte(ack, ack + maximumSegmentSize);
+        await sendFilePartToServer(data);
+      }
+    };
+
+    const sendFilePartToServer = async (data: string): Promise<any> => {
+      try {
+        const requestObject: IRequest = Protocoler.buildRequestObject(getTcpHeader(), data, 'ACK');
+
+        return await Requester.request(client, requestObject)
+          .then((response: Buffer) => {
+            const responseJSON = JSON.parse(response.toString());
+
+            seq = responseJSON.header.ack;
+            ack = responseJSON.header.ack;
+
+            return responseJSON as IResponse;
+          })
+          .catch((err) => {
+            console.error((err as Error)?.message || err);
+          });
+      } catch (err) {
+        console.error('Error sending file to server:', err);
+      }
+    };
+
+    await sendFileToServerByParts().catch((err) => console.error(err));
+  };
+
+  const finishConnection = async (): Promise<void> => {
+    const fyn: IRequest = Protocoler.buildRequestObject(getTcpHeader(), '', 'FYN', 'file', buffer.getFileName());
+
+    await Requester.request(client, fyn)
+      .catch((err) => {
+        console.error((err as Error)?.message || err);
+      })
       .finally(() => {
         client.close();
       });
-  };
-
-  const sendFileToServerByParts = async (): Promise<void> => {
-    for (let numberPackage = 0; seq < buffer.getLength(); numberPackage++) {
-      console.info(`Sending to server package ${numberPackage}...`);
-
-      printData();
-      const data = buffer.getDataByStartByteAndEndByte(ack, ack + maximumSegmentSize);
-      await sendFilePartToServer(data);
-    }
-
-    console.log('FyN');
-  };
-
-  const sendFilePartToServer = async (data: string): Promise<any> => {
-    try {
-      const requestObject: IRequest = Protocoler.buildRequestObject(getTcpHeader(), data, 'ACK');
-
-      return await Requester.request(client, requestObject)
-        .then((response: Buffer) => {
-          const responseJSON = JSON.parse(response.toString());
-
-          seq = responseJSON.header.ack;
-          ack = responseJSON.header.ack;
-
-          return responseJSON as IResponse;
-        })
-        .catch((err) => {
-          console.error((err as Error)?.message || err);
-        });
-    } catch (err) {
-      console.error('Error sending file to server:', err);
-    }
   };
 
   const getTcpHeader = (): ITcpHeader => {

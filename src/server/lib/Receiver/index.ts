@@ -1,4 +1,5 @@
 import createBufferControl from '../Buffer';
+import { buildFile } from 'server/services/file';
 import Protocoler from 'shared/lib/Protocoler';
 
 const Receiver = (clientAck: number, clientWindowSize: number, clientMSS: number): IReceiver => {
@@ -16,17 +17,21 @@ const Receiver = (clientAck: number, clientWindowSize: number, clientMSS: number
     return connectionResponseToString;
   };
 
-  const createSinalAckAndAddBuffer = async (data: IRequest): Promise<string> => {
+  const receiveData = async (data: IRequest): Promise<string> => {
     buffer.addBuffer(data.body.data);
 
     seq = ack;
     ack = buffer.getLength();
 
-    console.log(buffer.getLength());
-
     const connectionResponse: IRequest = Protocoler.buildRequestObject(getTcpHeader(), '', 'ACK');
-    const connectionResponseToString = JSON.stringify(connectionResponse);
-    return connectionResponseToString;
+    return JSON.stringify(connectionResponse);
+  };
+
+  const finishConnection = async (data: IRequest): Promise<string> => {
+    buildFile(buffer, data.body?.fileName);
+    const connectionResponse: IRequest = Protocoler.buildRequestObject(getTcpHeader(), '', 'FYN');
+
+    return JSON.stringify(connectionResponse);
   };
 
   const printData = (): void => {
@@ -50,7 +55,7 @@ const Receiver = (clientAck: number, clientWindowSize: number, clientMSS: number
     };
   };
 
-  return { establishConnection, printData, createSinalAckAndAddBuffer, getBuffer };
+  return { establishConnection, printData, receiveData, getBuffer, finishConnection };
 };
 
 export default Receiver;

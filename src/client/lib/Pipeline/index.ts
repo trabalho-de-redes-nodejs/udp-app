@@ -1,5 +1,10 @@
-const createPipelineControl = (data: string): PipelineControl => {
+const createPipelineControl = (data: string, _fileName: string): PipelineControl => {
   const Pipeline = data;
+  const fileName = _fileName;
+
+  const getFileName = (): string => {
+    return fileName;
+  };
 
   const getPipeline = (): string => {
     return Pipeline;
@@ -14,6 +19,7 @@ const createPipelineControl = (data: string): PipelineControl => {
   };
 
   return {
+    getFileName,
     getPipeline,
     getLength,
     getDataByStartByteAndEndByte,
