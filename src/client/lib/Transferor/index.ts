@@ -80,12 +80,16 @@ const Transferor = (pipeline: PipelineControl): ITransferor => {
         .then(async (responseBuffer: Buffer) => {
           const response: IResponse = JSON.parse(responseBuffer.toString());
 
-          if (response.header.ack >= ack) {
+          if (response.header.ack > ack) {
             rwnd = response.header.windowSize;
-
             Reports.addReport(`Received ACK: ${response.header.ack} | Server RWND: ${rwnd}`);
-
             await sendNextPackage();
+            return;
+          }
+
+          if (response.header.ack === ack) {
+            await Requester.request(requestObject);
+            return;
           }
         })
         .catch((err) => {

@@ -25,6 +25,20 @@ const Receiver = (clientAck: number, clientMSS: number): IReceiver => {
     ack = ack + data.body.data.length;
     rwnd -= data.body.data.length;
 
+    const missedAck = buffer.getMissedAck();
+
+    if (missedAck) {
+      const connectionResponse: IRequest = Protocoler.buildRequestObject(
+        {
+          ...getTcpHeader(),
+          ack: missedAck,
+        },
+        '',
+        'ACK'
+      );
+      return JSON.stringify(connectionResponse);
+    }
+
     if (rwnd <= clientMSS) {
       await unpackBuffer(data.body?.fileName);
     }
