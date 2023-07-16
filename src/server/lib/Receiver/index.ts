@@ -1,5 +1,7 @@
 import createBufferControl from '../Buffer';
+import ArbitraryError from '../ArbitraryError';
 import { buildFile, checkIfFileExists, addContentToFile } from 'server/services/file';
+import Checksum from 'shared/lib/Checksum';
 import Protocoler from 'shared/lib/Protocoler';
 import Reports from 'shared/lib/Report';
 
@@ -24,6 +26,36 @@ const Receiver = (clientAck: number, clientMSS: number): IReceiver => {
     seq = ack;
     ack = ack + data.body.data.length;
     rwnd -= data.body.data.length;
+
+    if (!Checksum.compareChecksum(data.body.data, data.header.checksum) || ArbitraryError.chanceToError(5)) {
+      Reports.addReport(`ERROR received data from client: from: ${data.header.ack} | to: ${data.header.seq}`);
+
+      const connectionResponse: IRequest = Protocoler.buildRequestObject(
+        {
+          ...getTcpHeader(),
+          ack: data.header.ack,
+        },
+        '',
+        'ACK'
+      );
+      return JSON.stringify(connectionResponse);
+    }
+
+    Reports.addReport(`Received data from client: from: ${data.header.ack} | to: ${data.header.ack + data.body.data.length}`);
+
+    const missedAck = buffer.getMissedAck();
+
+    if (missedAck) {
+      const connectionResponse: IRequest = Protocoler.buildRequestObject(
+        {
+          ...getTcpHeader(),
+          ack: missedAck,
+        },
+        '',
+        'ACK'
+      );
+      return JSON.stringify(connectionResponse);
+    }
 
     if (rwnd <= clientMSS) {
       await unpackBuffer(data.body?.fileName);

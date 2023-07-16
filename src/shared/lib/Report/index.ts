@@ -9,6 +9,7 @@ interface IReports {
 const Reports: IReports = {
   reports: [],
   addReport: (message: string) => {
+    console.log(message);
     Reports.reports.push({
       date: new Date(),
       message,

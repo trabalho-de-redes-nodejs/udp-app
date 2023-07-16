@@ -71,9 +71,6 @@ const Transferor = (pipeline: PipelineControl): ITransferor => {
 
       const data = buffer.getDataByStartByteAndEndByte(ack, ack + cwnd);
 
-      ack += data.length;
-      seq += data.length;
-
       const requestObject: IRequest = Protocoler.buildRequestObject(getTcpHeader(), data, 'ACK', 'file', buffer.getFileName());
 
       Requester.request(requestObject)
@@ -81,16 +78,26 @@ const Transferor = (pipeline: PipelineControl): ITransferor => {
           const response: IResponse = JSON.parse(responseBuffer.toString());
 
           if (response.header.ack >= ack) {
-            rwnd = response.header.windowSize;
-
             Reports.addReport(`Received ACK: ${response.header.ack} | Server RWND: ${rwnd}`);
-
+            rwnd = response.header.windowSize;
             await sendNextPackage();
+            return;
+          }
+
+          if (response.header.ack === requestObject.header.ack) {
+            Reports.addReport(
+              `REPEAT Sending package: ${requestObject.header.ack} - ${requestObject.header.ack + requestObject.body.data.length}`
+            );
+            await Requester.request(requestObject);
+            return;
           }
         })
         .catch((err) => {
           console.error((err as Error)?.message || err);
         });
+
+      ack += data.length;
+      seq += data.length;
 
       rwnd -= data.length;
       sendNextPackage();

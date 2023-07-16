@@ -5,4 +5,5 @@ interface BufferControl {
   getLength: () => number;
   getSize: () => number;
   clearBuffer: () => void;
+  getMissedAck: () => number | null;
 }
