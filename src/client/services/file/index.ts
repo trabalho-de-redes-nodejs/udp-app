@@ -1,4 +1,3 @@
-import { Socket } from 'dgram';
 import fs from 'fs';
 import path from 'path';
 
@@ -10,18 +9,13 @@ import Transferor from 'client/lib/Transferor';
 
 const directory = 'src/client/input';
 
-const sendFile = async (client: Socket): Promise<void> => {
+const sendFile = async (): Promise<void> => {
   try {
     const pipeline = await getPipeline();
 
-    const transferor = Transferor(pipeline, client);
-    console.log('Established connection!');
+    const transferor = Transferor(pipeline);
 
     await transferor.send();
-
-    // transferor.printData();
-
-    // await unpackPipeline(client);
   } catch (err) {
     console.error((err as Error)?.message || err);
   }

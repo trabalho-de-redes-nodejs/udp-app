@@ -1,21 +1,17 @@
-import dgram, { Socket } from 'dgram';
 import Reader from './lib/Reader';
 import Printer from './lib/Printer';
 import { sendFile } from './services/file';
 
-const client: Socket = dgram.createSocket('udp4');
-
 const menu: INavigation[] = [
   {
     title: 'Send a File to the Server',
-    run: async (client: Socket) => {
-      await sendFile(client).catch((err) => console.error(err));
+    run: async () => {
+      await sendFile().catch((err) => console.error(err));
     },
   },
   {
     title: 'Exit',
     run: () => {
-      client.close();
       console.info('Bye!');
       process.exit(0);
     },
@@ -32,7 +28,7 @@ const main = (): void => {
     main();
   }
 
-  menu[option].run(client).then(() => {
+  menu[option].run().then(() => {
     Printer.spacer();
     main();
   });

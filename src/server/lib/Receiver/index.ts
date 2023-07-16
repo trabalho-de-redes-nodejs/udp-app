@@ -24,6 +24,8 @@ const Receiver = (clientAck: number, clientWindowSize: number, clientMSS: number
     ack = ack + data.body.data.length;
     rwnd -= data.body.data.length;
 
+    console.log(`ack: ${data.header.ack}, seq: ${data.header.seq}, rwnd: ${rwnd}`);
+
     if (rwnd <= clientMSS) {
       await unpackBuffer(data.body?.fileName);
     }
@@ -48,7 +50,6 @@ const Receiver = (clientAck: number, clientWindowSize: number, clientMSS: number
 
     buffer.clearBuffer();
     rwnd = buffer.getSize();
-    return;
   };
 
   const printData = (): void => {
