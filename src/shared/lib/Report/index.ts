@@ -3,7 +3,7 @@ import fs from 'fs';
 interface IReports {
   reports: IReport[];
   addReport: (message: string) => void;
-  generateReportFile: () => void;
+  generateReportFile: (fileName: 'server.json' | 'client.json') => void;
 }
 
 const Reports: IReports = {
@@ -14,8 +14,8 @@ const Reports: IReports = {
       message,
     });
   },
-  generateReportFile: (): void => {
-    const filePath = 'reports.json';
+  generateReportFile: (fileName: 'server.json' | 'client.json'): void => {
+    const filePath = `./outputs/${fileName}`;
     fs.writeFile(filePath, JSON.stringify(Reports.reports), (err: any) => {
       if (err) {
         console.log(err);
@@ -23,6 +23,8 @@ const Reports: IReports = {
         console.log('Successfully wrote file');
       }
     });
+
+    Reports.reports = [];
   },
 };
 

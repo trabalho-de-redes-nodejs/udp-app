@@ -18,7 +18,7 @@ const Receiver = (clientAck: number, clientMSS: number): IReceiver => {
   };
 
   const receiveData = async (data: IRequest): Promise<string> => {
-    buffer.addBuffer(data.body.data);
+    buffer.addBuffer(data.body.data, data.header.ack);
 
     seq = ack;
     ack = ack + data.body.data.length;
@@ -46,7 +46,7 @@ const Receiver = (clientAck: number, clientMSS: number): IReceiver => {
 
     const fileExists = checkIfFileExists(fileName);
 
-    !fileExists ? await buildFile(buffer, fileName) : await addContentToFile(fileName, buffer.getBuffer());
+    !fileExists ? await buildFile(buffer, fileName) : await addContentToFile(fileName, buffer.getBufferAsString());
 
     buffer.clearBuffer();
     rwnd = buffer.getSize();

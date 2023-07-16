@@ -1,7 +1,7 @@
-import Reports from '../Report';
 import Protocoler from 'shared/lib/Protocoler';
 import Requester from 'client/lib/Requester';
 import { bufferSize } from 'config/config';
+import Reports from 'shared/lib/Report';
 
 interface ITransferor {
   send(): Promise<void>;

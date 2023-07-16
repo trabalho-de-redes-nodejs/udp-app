@@ -2,6 +2,7 @@ import dgram from 'dgram';
 import Receiver from './lib/Receiver';
 import { serverAddress, serverPort } from 'config/config';
 import Protocoler from 'shared/lib/Protocoler';
+import Reports from 'shared/lib/Report';
 
 const socket = dgram.createSocket('udp4');
 
@@ -14,14 +15,14 @@ socket.bind(serverPort, serverAddress, () => {
 const establishConnection = async (data: IRequest, remoteInfo: dgram.RemoteInfo): Promise<void> => {
   receiver = Receiver(data.header.ack, data.header.maximumSegmentSize);
 
-  console.log('Connection established with client:', remoteInfo.address, remoteInfo.port);
+  Reports.addReport(`Connection established with client: ${remoteInfo.address}:${remoteInfo.port}`);
 
   const responseMessage = await receiver.establishConnection();
   socket.send(responseMessage, remoteInfo.port, remoteInfo.address);
 };
 
 const responseAckAndAddToBuffer = async (data: IRequest, remoteInfo: dgram.RemoteInfo): Promise<void> => {
-  console.log('Received data from client:', remoteInfo.address, remoteInfo.port);
+  Reports.addReport(`Received data from client: ${remoteInfo.address}:${remoteInfo.port}`);
 
   const responseMessage: string = await receiver.receiveData(data);
   socket.send(responseMessage, remoteInfo.port, remoteInfo.address);
@@ -31,7 +32,8 @@ const finishConnection = async (data: IRequest, remoteInfo: dgram.RemoteInfo): P
   const response = await receiver.finishConnection(data);
   socket.send(response, remoteInfo.port, remoteInfo.address);
 
-  console.log('Connection finished with client:', remoteInfo.address, remoteInfo.port);
+  Reports.addReport(`Connection finished with client: ${remoteInfo.address}:${remoteInfo.port}`);
+  Reports.generateReportFile('server.json');
 };
 
 socket.on('message', (message: string, remoteInfo: dgram.RemoteInfo) => {
