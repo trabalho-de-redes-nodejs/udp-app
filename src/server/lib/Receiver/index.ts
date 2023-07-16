@@ -17,10 +17,12 @@ const Receiver = (clientAck: number, clientWindowSize: number, clientMSS: number
   };
 
   const createSinalAckAndAddBuffer = async (data: IRequest): Promise<string> => {
-    seq = ack;
-    ack = data.body.data.length;
-
     buffer.addBuffer(data.body.data);
+
+    seq = ack;
+    ack = buffer.getLength();
+
+    console.log(buffer.getLength());
 
     const connectionResponse: IRequest = Protocoler.buildRequestObject(getTcpHeader(), '', 'ACK');
     const connectionResponseToString = JSON.stringify(connectionResponse);

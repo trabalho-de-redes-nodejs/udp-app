@@ -13,11 +13,13 @@ socket.bind(serverPort, serverAddress, () => {
 
 const establishConnection = async (data: IRequest, remoteInfo: dgram.RemoteInfo): Promise<void> => {
   receiver = Receiver(data.header.ack, data.header.windowSize, data.header.maximumSegmentSize);
+  console.log('Connection established with client:', remoteInfo.address, remoteInfo.port);
   const responseMessage = await receiver.establishConnection();
   socket.send(responseMessage, remoteInfo.port, remoteInfo.address);
 };
 
 const responseAckAndAddToBuffer = async (data: IRequest, remoteInfo: dgram.RemoteInfo): Promise<void> => {
+  console.log('Received data from client:', remoteInfo.address, remoteInfo.port);
   const responseMessage: string = await receiver.createSinalAckAndAddBuffer(data);
   socket.send(responseMessage, remoteInfo.port, remoteInfo.address);
 };
@@ -30,7 +32,7 @@ socket.on('message', (message: string, remoteInfo: dgram.RemoteInfo) => {
       throw data;
     }
 
-    if (data.header.syn && receiver === null) {
+    if (data.header.syn) {
       establishConnection(data, remoteInfo);
       return;
     }

@@ -30,7 +30,7 @@ const Transferor = (pipeline: PipelineControl, clientSocket: Socket): ITransfero
         const responseJSON: IResponse = JSON.parse(response);
 
         seq = responseJSON.header.seq;
-        ack = responseJSON.header.seq + maximumSegmentSize;
+        ack = responseJSON.header.seq;
       })
       .catch((err) => {
         console.error((err as Error)?.message || err);
@@ -46,25 +46,29 @@ const Transferor = (pipeline: PipelineControl, clientSocket: Socket): ITransfero
   };
 
   const sendFileToServerByParts = async (): Promise<void> => {
-    for (let numberPackage = 0; numberPackage < buffer.getLength(); numberPackage++) {
-      console.log(seq, ' - ', ack);
-      const data = buffer.getDataByStartByteAndEndByte(seq, ack);
+    for (let numberPackage = 0; seq < buffer.getLength(); numberPackage++) {
+      console.info(`Sending to server package ${numberPackage}...`);
+
+      printData();
+      const data = buffer.getDataByStartByteAndEndByte(ack, ack + maximumSegmentSize);
       await sendFilePartToServer(data);
     }
+
+    console.log('FyN');
   };
 
-  const sendFilePartToServer = async (data: string): Promise<void> => {
+  const sendFilePartToServer = async (data: string): Promise<any> => {
     try {
       const requestObject: IRequest = Protocoler.buildRequestObject(getTcpHeader(), data, 'ACK');
 
-      //   console.info(`Sending to server package ${numberPackage}...`);
-
-      await Requester.request(client, requestObject)
+      return await Requester.request(client, requestObject)
         .then((response: Buffer) => {
           const responseJSON = JSON.parse(response.toString());
 
           seq = responseJSON.header.ack;
-          ack = seq;
+          ack = responseJSON.header.ack;
+
+          return responseJSON as IResponse;
         })
         .catch((err) => {
           console.error((err as Error)?.message || err);
