@@ -51,7 +51,7 @@ const Transferor = (pipeline: PipelineControl, clientSocket: Socket): ITransfero
 
     const sendFilePartToServer = async (data: string): Promise<any> => {
       try {
-        const requestObject: IRequest = Protocoler.buildRequestObject(getTcpHeader(), data, 'ACK');
+        const requestObject: IRequest = Protocoler.buildRequestObject(getTcpHeader(), data, 'ACK', 'file', buffer.getFileName());
 
         return await Requester.request(client, requestObject)
           .then((response: Buffer) => {
