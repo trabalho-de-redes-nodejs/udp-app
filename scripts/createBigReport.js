@@ -6,13 +6,17 @@ const file1Data = fs.readFileSync('./outputs/client.json', 'utf8');
 const file2Data = fs.readFileSync('./outputs/server.json', 'utf8');
 
 const file1Entries = JSON.parse(file1Data).map((entry) => {
-  entry.type = 'client';
-  return entry;
+  return {
+    type: 'client',
+    ...entry,
+  };
 });
 
 const file2Entries = JSON.parse(file2Data).map((entry) => {
-  entry.type = 'server';
-  return entry;
+  return {
+    type: 'server',
+    ...entry,
+  };
 });
 
 const mergedEntries = file1Entries.concat(file2Entries);
@@ -25,10 +29,8 @@ if (!fs.existsSync('./outputs')) {
   fs.mkdirSync('./outputs');
 }
 
-// if (fs.existsSync('../outputs/bigReport.json')) {
-//   fs.unlinkSync('../outputs/bigReport.json');
-// }
+if (fs.existsSync('../outputs/bigReport.json')) {
+  fs.unlinkSync('../outputs/bigReport.json');
+}
 
 fs.writeFileSync('./outputs/bigReport.json', sortedJson);
-
-// console.log('Done!', sortedJson);

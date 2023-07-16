@@ -47,12 +47,11 @@ Fluxo UDP em Node.js
 6.0 [ ] No cliente, fazer o controle de erro e enviar o chunk com erro novamente
 6.1 [ ] No servidor, enviar a chave de integridade do arquivo montado
 6.2 [ ] (async) No cliente, fazer a verificação de integridade do arquivo montado (adicionando o md5 no head da aplicação)
-6.3 [ ] No cliente, se tiver errado, fale que foi erro e aparece a mensagem para enviar novamente
 7.0 [x] No servidor, fazer um controle de pacotes
 7.1 [x] No cliente, colocar para enviar outro pacote caso tenha espaço no servidor (Recomendo criar uma lib Tranferor, que fará o controle do unpackPipeline, recebendo um pipeline cheio)
 7.2 [x] No cliente, criar uma variável ack para saber qual pacote enviar
-8.0 [ ] No cliente, criar variábel de sshtresh e adicionar um estado de Slow Start e Congetion avoidance no Tranferor
-9.0 [ ] No cliente e servidor, colocar um temporizador para salvar em um vetor os logs para criar o relatório
+8.0 [x] No cliente, criar variável de sshtresh e adicionar um estado de Slow Start e Congetion avoidance no Tranferor
+9.0 [x] No cliente e servidor, colocar um temporizador para salvar em um vetor os logs para criar o relatório
 
 ## Referência da API
 

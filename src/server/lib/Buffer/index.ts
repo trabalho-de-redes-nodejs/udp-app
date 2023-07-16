@@ -1,10 +1,12 @@
+import Reports from 'shared/lib/Report';
+
 const createBufferControl = (_size: number): BufferControl => {
   const buffer: string[] = [];
   const size = _size;
 
   const addBuffer = (data: string, ack: number): void => {
-    if (buffer[`${ack}`]) return console.log('Already received this package');
-    if (buffer.length >= size) return console.log('Buffer is full');
+    if (buffer[`${ack}`]) return Reports.addReport('Already received this package');
+    if (getLength() > size) return Reports.addReport(`Buffer is overflown: ${buffer.length} > ${size}`);
     orderBuffer();
 
     buffer[`${ack}`] = data;

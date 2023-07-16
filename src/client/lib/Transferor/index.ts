@@ -13,7 +13,10 @@ const Transferor = (pipeline: PipelineControl): ITransferor => {
   let ack = 0;
   let seq = 0;
 
-  let serverRwnd = 0;
+  let rwnd = 0;
+  let cwnd = 0;
+  let ssthresh = 0;
+  let mode: 'slowStart' | 'congestionAvoidance' = 'slowStart';
 
   const windowSize = pipeline.getLength();
   const maximumSegmentSize = bufferSize;
@@ -33,7 +36,8 @@ const Transferor = (pipeline: PipelineControl): ITransferor => {
 
         seq = responseJSON.header.seq;
         ack = responseJSON.header.seq;
-        serverRwnd = responseJSON.header.windowSize;
+        rwnd = responseJSON.header.windowSize;
+        ssthresh = responseJSON.header.windowSize / 2;
 
         Reports.addReport('Established connection!');
       })
@@ -44,13 +48,28 @@ const Transferor = (pipeline: PipelineControl): ITransferor => {
 
   const unpackPipeline = async (): Promise<void> => {
     const sendNextPackage = async (): Promise<any> => {
-      if (seq >= buffer.getLength() || serverRwnd <= maximumSegmentSize) {
+      if (seq >= buffer.getLength() || rwnd <= maximumSegmentSize) {
         return;
       }
 
-      Reports.addReport(`Sending package: ${ack} - ${ack + maximumSegmentSize}`);
+      if (mode === 'slowStart') {
+        cwnd += maximumSegmentSize;
+      }
 
-      const data = buffer.getDataByStartByteAndEndByte(ack, ack + maximumSegmentSize);
+      if (mode === 'slowStart' && rwnd < cwnd) {
+        mode = 'congestionAvoidance';
+      }
+
+      if (mode === 'congestionAvoidance') {
+        cwnd = maximumSegmentSize;
+        mode = 'slowStart';
+
+        Reports.addReport(`Congestion avoidance mode!: ${cwnd} < ${rwnd}`);
+      }
+
+      Reports.addReport(`Sending package: ${ack} - ${ack + cwnd}`);
+
+      const data = buffer.getDataByStartByteAndEndByte(ack, ack + cwnd);
 
       ack += data.length;
       seq += data.length;
@@ -62,9 +81,9 @@ const Transferor = (pipeline: PipelineControl): ITransferor => {
           const response: IResponse = JSON.parse(responseBuffer.toString());
 
           if (response.header.ack >= ack) {
-            serverRwnd = response.header.windowSize;
+            rwnd = response.header.windowSize;
 
-            Reports.addReport(`Received ACK: ${response.header.ack} | Server RWND: ${serverRwnd}`);
+            Reports.addReport(`Received ACK: ${response.header.ack} | Server RWND: ${rwnd}`);
 
             await sendNextPackage();
           }
@@ -73,7 +92,7 @@ const Transferor = (pipeline: PipelineControl): ITransferor => {
           console.error((err as Error)?.message || err);
         });
 
-      serverRwnd -= data.length;
+      rwnd -= data.length;
       sendNextPackage();
     };
 

@@ -16,6 +16,11 @@ const Reports: IReports = {
   },
   generateReportFile: (fileName: 'server.json' | 'client.json'): void => {
     const filePath = `./outputs/${fileName}`;
+
+    if (!fs.existsSync('./outputs')) {
+      fs.mkdirSync('./outputs');
+    }
+
     fs.writeFile(filePath, JSON.stringify(Reports.reports), (err: any) => {
       if (err) {
         console.log(err);
