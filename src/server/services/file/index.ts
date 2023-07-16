@@ -1,3 +1,4 @@
+import fs from 'fs';
 import FileOperator from 'shared/lib/FileOperator';
 
 const storagePath = 'src/server/storage';
@@ -10,9 +11,12 @@ const addContentToFile = async (fileName: string, content: string): Promise<bool
   return FileOperator.addContentToFile(`${storagePath}/${fileName}`, content);
 };
 
-const buildFile = async (buffer: any, fileName = 'file.txt'): Promise<void> => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
-  await FileOperator.createFileByInput(fileName, buffer.getBuffer(), storagePath);
+const buildFile = async (buffer: BufferControl, fileName = 'file.txt'): Promise<void> => {
+  if (!fs.existsSync(storagePath)) {
+    fs.mkdirSync(storagePath);
+  }
+
+  await FileOperator.createFileByInput(fileName, buffer.getBufferAsString(), storagePath);
 };
 
 export { buildFile, checkIfFileExists, addContentToFile };

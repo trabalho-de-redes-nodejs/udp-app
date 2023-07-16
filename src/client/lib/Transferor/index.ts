@@ -99,7 +99,7 @@ const Transferor = (pipeline: PipelineControl): ITransferor => {
     await sendNextPackage().catch((err) => console.error(err));
 
     while (seq < buffer.getLength()) {
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 1));
     }
   };
 
