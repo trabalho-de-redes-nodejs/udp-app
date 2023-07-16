@@ -1,7 +1,7 @@
+import Reports from '../shared/lib/Report';
 import Reader from './lib/Reader';
 import Printer from './lib/Printer';
 import { sendFile } from './services/file';
-import Reports from './lib/Report';
 
 const menu: INavigation[] = [
   {
@@ -30,7 +30,7 @@ const main = (): void => {
   }
 
   menu[option].run().then(() => {
-    Reports.generateReportFile();
+    Reports.generateReportFile('client.json');
   });
 };
 

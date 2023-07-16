@@ -1,6 +1,7 @@
 interface BufferControl {
-  addBuffer: (data: string) => void;
-  getBuffer: () => string;
+  addBuffer: (data: string, ack: number) => void;
+  getBuffer: () => string[];
+  getBufferAsString: () => string;
   getLength: () => number;
   getSize: () => number;
   clearBuffer: () => void;

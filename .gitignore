@@ -129,6 +129,7 @@ dist
 # i/o
 /src/client/input
 /src/server/storage
+/outputs
 
 # vscode
 .vscode

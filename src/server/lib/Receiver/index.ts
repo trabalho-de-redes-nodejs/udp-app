@@ -1,6 +1,7 @@
 import createBufferControl from '../Buffer';
 import { buildFile, checkIfFileExists, addContentToFile } from 'server/services/file';
 import Protocoler from 'shared/lib/Protocoler';
+import Reports from 'shared/lib/Report';
 
 const Receiver = (clientAck: number, clientMSS: number): IReceiver => {
   const buffer: BufferControl = createBufferControl(clientMSS * 10);
@@ -18,13 +19,11 @@ const Receiver = (clientAck: number, clientMSS: number): IReceiver => {
   };
 
   const receiveData = async (data: IRequest): Promise<string> => {
-    buffer.addBuffer(data.body.data);
+    buffer.addBuffer(data.body.data, data.header.ack);
 
     seq = ack;
     ack = ack + data.body.data.length;
     rwnd -= data.body.data.length;
-
-    console.log(`ack: ${data.header.ack}, seq: ${data.header.seq}, rwnd: ${rwnd}`);
 
     if (rwnd <= clientMSS) {
       await unpackBuffer(data.body?.fileName);
@@ -42,11 +41,11 @@ const Receiver = (clientAck: number, clientMSS: number): IReceiver => {
   };
 
   const unpackBuffer = async (fileName = 'file.txt'): Promise<void> => {
-    console.log('Unpacking buffer...', fileName);
+    Reports.addReport('Unpacking buffer...');
 
     const fileExists = checkIfFileExists(fileName);
 
-    !fileExists ? await buildFile(buffer, fileName) : await addContentToFile(fileName, buffer.getBuffer());
+    !fileExists ? await buildFile(buffer, fileName) : await addContentToFile(fileName, buffer.getBufferAsString());
 
     buffer.clearBuffer();
     rwnd = buffer.getSize();
