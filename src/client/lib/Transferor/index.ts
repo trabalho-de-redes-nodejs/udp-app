@@ -1,8 +1,6 @@
 import { Socket } from 'dgram';
-import fs from 'fs';
 import Protocoler from 'shared/lib/Protocoler';
 import Requester from 'client/lib/Requester';
-import FileSplitter from 'shared/lib/FileSplitter';
 import { bufferSize } from 'config/config';
 
 interface ITransferor {
@@ -25,9 +23,9 @@ const Transferor = (pipeline: PipelineControl, clientSocket: Socket): ITransfero
   };
 
   const establishConnection = async (): Promise<void> => {
-    const firstWay: IRequest = Protocoler.buildRequestObject(getTcpHeader(), '', 'SYN');
+    const syn: IRequest = Protocoler.buildRequestObject(getTcpHeader(), '', 'SYN');
 
-    await Requester.request(client, firstWay)
+    await Requester.request(client, syn)
       .then((response: string) => {
         const responseJSON: IResponse = JSON.parse(response);
 
@@ -44,34 +42,29 @@ const Transferor = (pipeline: PipelineControl, clientSocket: Socket): ITransfero
       .catch((err) => console.error(err))
       .finally(() => {
         client.close();
-        // FileSplitter.deleteFilesFromArray(pipeline.getPipeline());
       });
   };
 
   const sendFileToServerByParts = async (): Promise<void> => {
-    let numberPackage = 0;
-    while (seq < buffer.getLength()) {
-      //   console.log(seq, ' ', ack);
+    for (let numberPackage = 0; numberPackage < buffer.getLength(); numberPackage++) {
+      console.log(seq, ' - ', ack);
       const data = buffer.getDataByStartByteAndEndByte(seq, ack);
-
-      numberPackage++;
-      await sendFilePartToServer(data, numberPackage);
+      await sendFilePartToServer(data);
     }
   };
 
-  const sendFilePartToServer = async (data: string, numberPackage: number): Promise<void> => {
+  const sendFilePartToServer = async (data: string): Promise<void> => {
     try {
       const requestObject: IRequest = Protocoler.buildRequestObject(getTcpHeader(), data, 'ACK');
 
-      console.info(`Sending to server package ${numberPackage}...`);
+      //   console.info(`Sending to server package ${numberPackage}...`);
 
       await Requester.request(client, requestObject)
         .then((response: Buffer) => {
-          console.log('Response:', response.toString());
           const responseJSON = JSON.parse(response.toString());
 
           seq = responseJSON.header.ack;
-          //   ack = responseJSON.header.seq;
+          ack = seq;
         })
         .catch((err) => {
           console.error((err as Error)?.message || err);

@@ -1,9 +1,9 @@
 import createBufferControl from '../Buffer';
 import Protocoler from 'shared/lib/Protocoler';
 
-const Receiver = (clientSeq: number, clientAck: number, clientWindowSize: number, clientMSS: number): IReceiver => {
+const Receiver = (clientAck: number, clientWindowSize: number, clientMSS: number): IReceiver => {
   const buffer: BufferControl = createBufferControl();
-  let ack = clientSeq + 1;
+  let ack = 0;
   let seq = clientAck;
   const maximumSegmentSize = clientMSS;
   const windowSize = clientWindowSize;
@@ -16,11 +16,11 @@ const Receiver = (clientSeq: number, clientAck: number, clientWindowSize: number
     return connectionResponseToString;
   };
 
-  const createSinalAckAndAddBuffer = async (data: string): Promise<string> => {
-    ack = clientSeq + clientMSS;
-    seq = ack - clientMSS;
+  const createSinalAckAndAddBuffer = async (data: IRequest): Promise<string> => {
+    seq = ack;
+    ack = data.body.data.length;
 
-    buffer.addBuffer(data);
+    buffer.addBuffer(data.body.data);
 
     const connectionResponse: IRequest = Protocoler.buildRequestObject(getTcpHeader(), '', 'ACK');
     const connectionResponseToString = JSON.stringify(connectionResponse);
