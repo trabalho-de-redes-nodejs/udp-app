@@ -1,9 +1,5 @@
-import { Socket } from 'dgram';
-import fs from 'fs';
 import createBufferControl from '../Buffer';
 import Protocoler from 'shared/lib/Protocoler';
-import Requester from 'client/lib/Requester';
-import FileSplitter from 'shared/lib/FileSplitter';
 
 const Receiver = (clientSeq: number, clientAck: number, clientWindowSize: number, clientMSS: number): IReceiver => {
   const buffer: BufferControl = createBufferControl();

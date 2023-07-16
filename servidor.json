@@ -1,0 +1,20 @@
+{
+  "responses": [
+    {
+      "ack": 0, // próximo byte que você quer receber
+      "seq": 0 // seq server (que é 0)
+    },
+    {
+      "ack": 1024, // ultimo byte + 1
+      "seq": 0
+    },
+    {
+      "ack": 2048, // ultimo byte + 1
+      "seq": 1024
+    },
+    {
+      "ack": 3072, // ultimo byte + 1
+      "seq": 2048
+    }
+  ]
+}
