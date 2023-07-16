@@ -22,8 +22,6 @@ const establishConnection = async (data: IRequest, remoteInfo: dgram.RemoteInfo)
 };
 
 const responseAckAndAddToBuffer = async (data: IRequest, remoteInfo: dgram.RemoteInfo): Promise<void> => {
-  Reports.addReport(`Received data from client: ${remoteInfo.address}:${remoteInfo.port}`);
-
   const responseMessage: string = await receiver.receiveData(data);
   socket.send(responseMessage, remoteInfo.port, remoteInfo.address);
 };

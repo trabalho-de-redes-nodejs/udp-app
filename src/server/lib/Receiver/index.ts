@@ -1,4 +1,5 @@
 import createBufferControl from '../Buffer';
+import ArbitraryError from '../ArbitraryError';
 import { buildFile, checkIfFileExists, addContentToFile } from 'server/services/file';
 import Checksum from 'shared/lib/Checksum';
 import Protocoler from 'shared/lib/Protocoler';
@@ -26,13 +27,13 @@ const Receiver = (clientAck: number, clientMSS: number): IReceiver => {
     ack = ack + data.body.data.length;
     rwnd -= data.body.data.length;
 
-    const missedAck = buffer.getMissedAck();
+    if (!Checksum.compareChecksum(data.body.data, data.header.checksum) || ArbitraryError.chanceToError(5)) {
+      Reports.addReport(`ERROR received data from client: from: ${data.header.ack} | to: ${data.header.seq}`);
 
-    if (missedAck) {
       const connectionResponse: IRequest = Protocoler.buildRequestObject(
         {
           ...getTcpHeader(),
-          ack: missedAck,
+          ack: data.header.ack,
         },
         '',
         'ACK'
@@ -40,13 +41,15 @@ const Receiver = (clientAck: number, clientMSS: number): IReceiver => {
       return JSON.stringify(connectionResponse);
     }
 
-    console.log(`checksum ${data.header.ack}`, Checksum.compareChecksum(data.body.data, data.header.checksum));
+    Reports.addReport(`Received data from client: from: ${data.header.ack} | to: ${data.header.ack + data.body.data.length}`);
 
-    if (!Checksum.compareChecksum(data.body.data, data.header.checksum)) {
+    const missedAck = buffer.getMissedAck();
+
+    if (missedAck) {
       const connectionResponse: IRequest = Protocoler.buildRequestObject(
         {
           ...getTcpHeader(),
-          ack: ack,
+          ack: missedAck,
         },
         '',
         'ACK'

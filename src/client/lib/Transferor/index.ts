@@ -78,13 +78,16 @@ const Transferor = (pipeline: PipelineControl): ITransferor => {
           const response: IResponse = JSON.parse(responseBuffer.toString());
 
           if (response.header.ack >= ack) {
-            rwnd = response.header.windowSize;
             Reports.addReport(`Received ACK: ${response.header.ack} | Server RWND: ${rwnd}`);
+            rwnd = response.header.windowSize;
             await sendNextPackage();
             return;
           }
 
           if (response.header.ack === requestObject.header.ack) {
+            Reports.addReport(
+              `REPEAT Sending package: ${requestObject.header.ack} - ${requestObject.header.ack + requestObject.body.data.length}`
+            );
             await Requester.request(requestObject);
             return;
           }
