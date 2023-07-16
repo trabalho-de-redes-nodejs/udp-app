@@ -2,7 +2,7 @@ import createBufferControl from '../Buffer';
 import { buildFile, checkIfFileExists, addContentToFile } from 'server/services/file';
 import Protocoler from 'shared/lib/Protocoler';
 
-const Receiver = (clientAck: number, clientWindowSize: number, clientMSS: number): IReceiver => {
+const Receiver = (clientAck: number, clientMSS: number): IReceiver => {
   const buffer: BufferControl = createBufferControl(clientMSS * 10);
   let ack = 0;
   let seq = clientAck;
@@ -52,14 +52,6 @@ const Receiver = (clientAck: number, clientWindowSize: number, clientMSS: number
     rwnd = buffer.getSize();
   };
 
-  const printData = (): void => {
-    console.log('Receiver');
-    console.log('seq: ', seq);
-    console.log('ack: ', ack);
-    console.log('windowSize: ', rwnd);
-    console.log('maximumSegmentSize: ', maximumSegmentSize);
-  };
-
   const getBuffer = async (): Promise<BufferControl> => {
     return buffer;
   };
@@ -73,7 +65,7 @@ const Receiver = (clientAck: number, clientWindowSize: number, clientMSS: number
     };
   };
 
-  return { establishConnection, printData, receiveData, getBuffer, finishConnection };
+  return { establishConnection, receiveData, getBuffer, finishConnection };
 };
 
 export default Receiver;

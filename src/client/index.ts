@@ -1,6 +1,7 @@
 import Reader from './lib/Reader';
 import Printer from './lib/Printer';
 import { sendFile } from './services/file';
+import Reports from './lib/Report';
 
 const menu: INavigation[] = [
   {
@@ -29,8 +30,7 @@ const main = (): void => {
   }
 
   menu[option].run().then(() => {
-    Printer.spacer();
-    main();
+    Reports.generateReportFile();
   });
 };
 

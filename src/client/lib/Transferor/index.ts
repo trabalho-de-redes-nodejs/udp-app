@@ -1,10 +1,10 @@
+import Reports from '../Report';
 import Protocoler from 'shared/lib/Protocoler';
 import Requester from 'client/lib/Requester';
 import { bufferSize } from 'config/config';
 
 interface ITransferor {
   send(): Promise<void>;
-  printData(): void;
 }
 
 const Transferor = (pipeline: PipelineControl): ITransferor => {
@@ -35,7 +35,7 @@ const Transferor = (pipeline: PipelineControl): ITransferor => {
         ack = responseJSON.header.seq;
         serverRwnd = responseJSON.header.windowSize;
 
-        console.log('Established connection!');
+        Reports.addReport('Established connection!');
       })
       .catch((err) => {
         console.error((err as Error)?.message || err);
@@ -48,9 +48,7 @@ const Transferor = (pipeline: PipelineControl): ITransferor => {
         return;
       }
 
-      console.log(`
-        Sending package: ${ack} - ${ack + maximumSegmentSize}
-      `);
+      Reports.addReport(`Sending package: ${ack} - ${ack + maximumSegmentSize}`);
 
       const data = buffer.getDataByStartByteAndEndByte(ack, ack + maximumSegmentSize);
 
@@ -66,10 +64,7 @@ const Transferor = (pipeline: PipelineControl): ITransferor => {
           if (response.header.ack >= ack) {
             serverRwnd = response.header.windowSize;
 
-            console.log(`
-                Received ACK: ${response.header.ack}
-                Server RWND: ${serverRwnd}
-            `);
+            Reports.addReport(`Received ACK: ${response.header.ack} | Server RWND: ${serverRwnd}`);
 
             await sendNextPackage();
           }
@@ -85,16 +80,20 @@ const Transferor = (pipeline: PipelineControl): ITransferor => {
     await sendNextPackage().catch((err) => console.error(err));
 
     while (seq < buffer.getLength()) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 10));
     }
   };
 
   const finishConnection = async (): Promise<void> => {
     const fyn: IRequest = Protocoler.buildRequestObject(getTcpHeader(), '', 'FYN', 'file', buffer.getFileName());
 
-    await Requester.request(fyn).catch((err) => {
-      console.error((err as Error)?.message || err);
-    });
+    await Requester.request(fyn)
+      .catch((err) => {
+        console.error((err as Error)?.message || err);
+      })
+      .finally(() => {
+        Reports.addReport('Finished connection!');
+      });
   };
 
   const getTcpHeader = (): ITcpHeader => {
@@ -106,12 +105,7 @@ const Transferor = (pipeline: PipelineControl): ITransferor => {
     };
   };
 
-  const printData = (): void => {
-    console.log('Seq Cliente: ', seq);
-    console.log('Ack Cliente: ', ack);
-  };
-
-  return { send, printData };
+  return { send };
 };
 
 export default Transferor;

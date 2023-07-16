@@ -5,14 +5,14 @@ import Protocoler from 'shared/lib/Protocoler';
 
 const socket = dgram.createSocket('udp4');
 
-let receiver: IReceiver = Receiver(0, 0, 0);
+let receiver: IReceiver = Receiver(0, 0);
 
 socket.bind(serverPort, serverAddress, () => {
   console.log(`Server listening on ${serverAddress}:${serverPort}`);
 });
 
 const establishConnection = async (data: IRequest, remoteInfo: dgram.RemoteInfo): Promise<void> => {
-  receiver = Receiver(data.header.ack, data.header.windowSize, data.header.maximumSegmentSize);
+  receiver = Receiver(data.header.ack, data.header.maximumSegmentSize);
 
   console.log('Connection established with client:', remoteInfo.address, remoteInfo.port);
 
