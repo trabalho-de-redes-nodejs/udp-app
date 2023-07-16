@@ -1,40 +1,28 @@
-interface PipelineControl {
-  addItem: (data: string) => void;
-  getPipeline: () => string[];
-  getLength: () => number;
-  shift: () => void;
-  getFirstItem: () => string;
-}
+const createPipelineControl = (data: string, _fileName: string): PipelineControl => {
+  const Pipeline = data;
+  const fileName = _fileName;
 
-const createPipelineControl = (): PipelineControl => {
-  const Pipeline: string[] = [];
-
-  const addItem = (data: string): void => {
-    Pipeline.push(data);
+  const getFileName = (): string => {
+    return fileName;
   };
 
-  const getFirstItem = (): string => {
-    return Pipeline[0];
-  };
-
-  const getPipeline = (): string[] => {
+  const getPipeline = (): string => {
     return Pipeline;
-  };
-
-  const shift = (): void => {
-    Pipeline.shift();
   };
 
   const getLength = (): number => {
     return Pipeline.length;
   };
 
+  const getDataByStartByteAndEndByte = (startByte: number, endByte: number): string => {
+    return Pipeline.slice(startByte, endByte);
+  };
+
   return {
-    addItem,
+    getFileName,
     getPipeline,
-    shift,
     getLength,
-    getFirstItem,
+    getDataByStartByteAndEndByte,
   };
 };
 

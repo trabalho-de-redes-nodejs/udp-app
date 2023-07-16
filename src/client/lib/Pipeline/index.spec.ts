@@ -1,46 +1,33 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import createPipelineControl from '.';
 
-describe('PipelineControl', () => {
-  let pipeline: ReturnType<typeof createPipelineControl>;
+describe('createPipelineControl', () => {
+  const data = 'Hello, World!';
+  const pipelineControl = createPipelineControl(data);
 
-  beforeEach(() => {
-    pipeline = createPipelineControl();
+  it('getPipeline should return the correct pipeline', () => {
+    const pipeline = pipelineControl.getPipeline();
+    expect(pipeline).toBe(data);
   });
 
-  it('should add an item to the pipeline', () => {
-    pipeline.addItem('Data 1');
-    expect(pipeline.getPipeline()).toEqual(['Data 1']);
-    expect(pipeline.getLength()).toBe(1);
+  it('getLength should return the correct length of the pipeline', () => {
+    const length = pipelineControl.getLength();
+    expect(length).toBe(data.length);
   });
 
-  it('should remove the first item from the pipeline', () => {
-    pipeline.addItem('Data 1');
-    pipeline.addItem('Data 2');
-    pipeline.addItem('Data 3');
-    pipeline.shift();
-    expect(pipeline.getPipeline()).toEqual(['Data 2', 'Data 3']);
-    expect(pipeline.getLength()).toBe(2);
+  it('getDataByStartByteAndEndByte should return the correct data slice', () => {
+    const startByte = 7;
+    const endByte = 12;
+    const expectedSlice = data.slice(startByte, endByte);
+    const slice = pipelineControl.getDataByStartByteAndEndByte(startByte, endByte);
+    expect(slice).toBe(expectedSlice);
   });
 
-  it('should return the correct pipeline', () => {
-    pipeline.addItem('Data 1');
-    pipeline.addItem('Data 2');
-    pipeline.addItem('Data 3');
-    expect(pipeline.getPipeline()).toEqual(['Data 1', 'Data 2', 'Data 3']);
-  });
-
-  it('should return the correct length of the pipeline', () => {
-    expect(pipeline.getLength()).toBe(0);
-    pipeline.addItem('Data 1');
-    expect(pipeline.getLength()).toBe(1);
-    pipeline.addItem('Data 2');
-    expect(pipeline.getLength()).toBe(2);
-  });
-
-  it('should return the first item of the pipeline', () => {
-    pipeline.addItem('Data 1');
-    pipeline.addItem('Data 2');
-    expect(pipeline.getFirstItem()).toBe('Data 1');
+  it('getDataByStartByteAndEndByte should return the correct data slice', () => {
+    const startByte = 0;
+    const endByte = 5;
+    const expectedSlice = 'Hello';
+    const slice = pipelineControl.getDataByStartByteAndEndByte(startByte, endByte);
+    expect(slice).toBe(expectedSlice);
   });
 });

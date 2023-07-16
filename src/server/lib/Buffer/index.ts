@@ -1,23 +1,16 @@
-interface BufferControl {
-  addBuffer: (data: string | number) => void;
-  getBuffer: () => (string | number)[];
-  getLength: () => number;
-  clearBuffer: () => void;
-}
-
 const createBufferControl = (): BufferControl => {
-  const buffer: (string | number)[] = [];
+  let buffer = '';
 
-  const addBuffer = (data: string | number): void => {
-    buffer.push(data);
+  const addBuffer = (data: string): void => {
+    buffer += data;
   };
 
-  const getBuffer = (): (string | number)[] => {
+  const getBuffer = (): string => {
     return buffer;
   };
 
   const clearBuffer = (): void => {
-    buffer.length = 0;
+    buffer = '';
   };
 
   const getLength = (): number => {

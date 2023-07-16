@@ -1,33 +1,58 @@
 import dgram from 'dgram';
-import message from './services/message';
-import file from './services/file';
+import Receiver from './lib/Receiver';
 import { serverAddress, serverPort } from 'config/config';
 import Protocoler from 'shared/lib/Protocoler';
 
 const socket = dgram.createSocket('udp4');
 
-const respond = (data: IRequest, remoteInfo: dgram.RemoteInfo): string | number => {
-  switch (data.header.type) {
-    case 'message':
-      return message(data.body, remoteInfo);
-    case 'file':
-      return file(data, remoteInfo);
-    default:
-      throw new Error('Invalid request type');
-  }
-};
+let receiver: IReceiver = Receiver(0, 0, 0);
 
 socket.bind(serverPort, serverAddress, () => {
   console.log(`Server listening on ${serverAddress}:${serverPort}`);
 });
 
+const establishConnection = async (data: IRequest, remoteInfo: dgram.RemoteInfo): Promise<void> => {
+  receiver = Receiver(data.header.ack, data.header.windowSize, data.header.maximumSegmentSize);
+
+  console.log('Connection established with client:', remoteInfo.address, remoteInfo.port);
+
+  const responseMessage = await receiver.establishConnection();
+  socket.send(responseMessage, remoteInfo.port, remoteInfo.address);
+};
+
+const responseAckAndAddToBuffer = async (data: IRequest, remoteInfo: dgram.RemoteInfo): Promise<void> => {
+  console.log('Received data from client:', remoteInfo.address, remoteInfo.port);
+
+  const responseMessage: string = await receiver.receiveData(data);
+  socket.send(responseMessage, remoteInfo.port, remoteInfo.address);
+};
+
+const finishConnection = async (data: IRequest, remoteInfo: dgram.RemoteInfo): Promise<void> => {
+  const response = await receiver.finishConnection(data);
+  socket.send(response, remoteInfo.port, remoteInfo.address);
+
+  console.log('Connection finished with client:', remoteInfo.address, remoteInfo.port);
+};
+
 socket.on('message', (message: string, remoteInfo: dgram.RemoteInfo) => {
   try {
     const data: IRequest = Protocoler.getRequestObject(message);
-    const responseMessage = respond(data, remoteInfo);
 
-    const bytesToSend = Buffer.from(`${responseMessage}`);
-    socket.send(bytesToSend, remoteInfo.port, remoteInfo.address);
+    if (!data) {
+      throw data;
+    }
+
+    if (data.header.syn) {
+      establishConnection(data, remoteInfo);
+      return;
+    }
+
+    if (data.header.fyn) {
+      finishConnection(data, remoteInfo);
+      return;
+    }
+
+    responseAckAndAddToBuffer(data, remoteInfo);
   } catch (err) {
     const errorResponse = (err as Error)?.message || err;
     console.error(errorResponse);

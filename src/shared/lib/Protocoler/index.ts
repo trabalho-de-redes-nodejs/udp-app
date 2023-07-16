@@ -2,7 +2,7 @@ import buildRequestObject from './buildRequestObject';
 import getRequestObject from './getRequestObject';
 
 interface IProtocoler {
-  buildRequestObject: (type: TRequestType, totalParts: number, partNumber: number, data: any, fileName?: string) => IRequest;
+  buildRequestObject: (header: ITcpHeader, data: string, flag?: 'SYN' | 'FYN' | 'ACK', type?: TRequestType, fileName?: string) => IRequest;
   getRequestObject: (request: string) => IRequest;
 }
 

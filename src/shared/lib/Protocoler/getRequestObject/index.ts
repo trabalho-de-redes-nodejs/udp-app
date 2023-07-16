@@ -7,7 +7,7 @@ const verifyRequest = (request: any): boolean => {
 
   const header = request?.header;
 
-  if (!header?.type || !header?.totalParts || !header?.partNumber) {
+  if (header.seq === null || header.ack === null) {
     return false;
   }
 
@@ -21,23 +21,26 @@ const getRequestObject = (data: string): IRequest => {
     }
 
     const request: IRequest = JSON.parse(data);
-    const { type, totalParts, partNumber } = request.header;
+    const { seq, ack } = request.header;
+    const { type } = request.body;
 
-    if (!checkAcceptedTypes(type)) {
+    if (type && !checkAcceptedTypes(type)) {
       throw new Error('Invalid request type');
     }
 
-    if (totalParts < 1) {
+    if (seq < 0) {
       throw new Error('Invalid total parts');
     }
 
-    if (partNumber < 1 || partNumber > totalParts) {
+    if (ack < 0) {
       throw new Error('Invalid part number');
     }
 
     return request;
-  } catch (e) {
-    throw new Error('Invalid request');
+  } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    throw new Error((err as Error)?.message || err);
   }
 };
 

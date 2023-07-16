@@ -1,13 +1,19 @@
 interface IRequest {
   header: IHeader;
-  body: string;
+  body: IBody;
 }
 
-interface IHeader {
-  type: TRequestType;
-  totalParts: number;
-  partNumber: number;
+interface IBody {
+  type?: TRequestType;
   fileName?: string;
+  data: string;
+}
+
+interface ITcpHeader {
+  ack: number;
+  seq: number;
+  windowSize: number;
+  maximumSegmentSize: number;
 }
 
 type TRequestType = 'file' | 'message';

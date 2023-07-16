@@ -5,47 +5,36 @@ import path from 'path';
 import FileOperator from 'shared/lib/FileOperator';
 import Reader from 'client/lib/Reader';
 import Printer from 'client/lib/Printer';
-import Requester from 'client/lib/Requester';
-import FileSplitter from 'shared/lib/FileSplitter';
-import Protocoler from 'shared/lib/Protocoler';
 import createPipelineControl from 'client/lib/Pipeline';
+import Transferor from 'client/lib/Transferor';
 
 const directory = 'src/client/input';
-const pipeline = createPipelineControl();
 
 const sendFile = async (client: Socket): Promise<void> => {
   try {
-    await fillPipeline();
-    await unpackPipeline(client);
+    const pipeline = await getPipeline();
+
+    const transferor = Transferor(pipeline, client);
+    console.log('Established connection!');
+
+    await transferor.send();
+
+    // transferor.printData();
+
+    // await unpackPipeline(client);
   } catch (err) {
     console.error((err as Error)?.message || err);
   }
 };
 
-const fillPipeline = async (): Promise<void> => {
-  const fileName: string = await chooseFileOrCreate().then((file) => file);
+const getPipeline = async (): Promise<PipelineControl> => {
+  const filePath: string = await chooseFileOrCreate().then((file) => file);
 
-  const splittedFile = await FileSplitter.splitFileBySize(fileName, 1024)
-    .then((names) => names)
-    .catch((err) => {
-      console.error((err as Error)?.message || err);
-      return [];
-    });
+  const fileData: string = fs.readFileSync(filePath).toString();
 
-  if (!splittedFile || splittedFile === undefined || (splittedFile as string[]).length === 0) {
-    return;
-  }
+  const fileName: string = path.basename(filePath);
 
-  (splittedFile as string[]).forEach((file) => pipeline.addItem(file));
-};
-
-const unpackPipeline = async (client: Socket): Promise<void> => {
-  await sendFileToServerByParts(client)
-    .catch((err) => console.error(err))
-    .finally(() => {
-      client.close();
-      FileSplitter.deleteFilesFromArray(pipeline.getPipeline());
-    });
+  return createPipelineControl(fileData, fileName);
 };
 
 const chooseFileOrCreate = async (): Promise<string> => {
@@ -84,34 +73,6 @@ const createFileByInput = async (): Promise<string> => {
   const fileSize: number = Reader.integer('Type a file size to create (in bytes):', { min: 0 });
 
   return await FileOperator.createFileBySize(fileName, fileSize);
-};
-
-const sendFileToServerByParts = async (client: Socket): Promise<void> => {
-  const totalParts = pipeline.getLength();
-
-  for (let partIndex = 1; partIndex <= totalParts; partIndex++) {
-    const partName = pipeline.getPipeline()[0];
-    await sendFilePartToServer(client, partName, partIndex, totalParts);
-    pipeline.shift();
-  }
-};
-const sendFilePartToServer = async (client: Socket, name: string, index: number, total: number): Promise<void> => {
-  try {
-    const message: string = fs.readFileSync(name, { encoding: 'utf-8' });
-    const requestObject: IRequest = Protocoler.buildRequestObject('file', total, index, message, name);
-
-    console.info(`Sending file ${name} to server...`);
-
-    await Requester.request(client, requestObject)
-      .then((response: Buffer) => {
-        console.log('Response:', response.toString());
-      })
-      .catch((err) => {
-        console.error((err as Error)?.message || err);
-      });
-  } catch (err) {
-    console.error('Error sending file to server:', err);
-  }
 };
 
 export { sendFile };
