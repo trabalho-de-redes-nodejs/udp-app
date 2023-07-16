@@ -1,13 +1,13 @@
 import createBufferControl from '../Buffer';
-import { buildFile } from 'server/services/file';
+import { buildFile, checkIfFileExists, addContentToFile } from 'server/services/file';
 import Protocoler from 'shared/lib/Protocoler';
 
 const Receiver = (clientAck: number, clientWindowSize: number, clientMSS: number): IReceiver => {
-  const buffer: BufferControl = createBufferControl();
+  const buffer: BufferControl = createBufferControl(clientMSS * 10);
   let ack = 0;
   let seq = clientAck;
   const maximumSegmentSize = clientMSS;
-  const windowSize = clientWindowSize;
+  let rwnd = buffer.getSize();
 
   const establishConnection = async (): Promise<string> => {
     const connectionResponse: IRequest = Protocoler.buildRequestObject(getTcpHeader(), '', 'SYN');
@@ -21,24 +21,42 @@ const Receiver = (clientAck: number, clientWindowSize: number, clientMSS: number
     buffer.addBuffer(data.body.data);
 
     seq = ack;
-    ack = buffer.getLength();
+    ack = ack + data.body.data.length;
+    rwnd -= data.body.data.length;
+
+    console.log(`ack: ${data.header.ack}, seq: ${data.header.seq}, rwnd: ${rwnd}`);
+
+    if (rwnd <= clientMSS) {
+      await unpackBuffer(data.body?.fileName);
+    }
 
     const connectionResponse: IRequest = Protocoler.buildRequestObject(getTcpHeader(), '', 'ACK');
     return JSON.stringify(connectionResponse);
   };
 
   const finishConnection = async (data: IRequest): Promise<string> => {
-    buildFile(buffer, data.body?.fileName);
+    unpackBuffer(data.body?.fileName);
     const connectionResponse: IRequest = Protocoler.buildRequestObject(getTcpHeader(), '', 'FYN');
 
     return JSON.stringify(connectionResponse);
+  };
+
+  const unpackBuffer = async (fileName = 'file.txt'): Promise<void> => {
+    console.log('Unpacking buffer...', fileName);
+
+    const fileExists = checkIfFileExists(fileName);
+
+    !fileExists ? await buildFile(buffer, fileName) : await addContentToFile(fileName, buffer.getBuffer());
+
+    buffer.clearBuffer();
+    rwnd = buffer.getSize();
   };
 
   const printData = (): void => {
     console.log('Receiver');
     console.log('seq: ', seq);
     console.log('ack: ', ack);
-    console.log('windowSize: ', windowSize);
+    console.log('windowSize: ', rwnd);
     console.log('maximumSegmentSize: ', maximumSegmentSize);
   };
 
@@ -50,7 +68,7 @@ const Receiver = (clientAck: number, clientWindowSize: number, clientMSS: number
     return {
       ack,
       seq,
-      windowSize,
+      windowSize: rwnd,
       maximumSegmentSize,
     };
   };

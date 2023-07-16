@@ -1,5 +1,6 @@
-const createBufferControl = (): BufferControl => {
+const createBufferControl = (_size: number): BufferControl => {
   let buffer = '';
+  const size = _size;
 
   const addBuffer = (data: string): void => {
     buffer += data;
@@ -17,9 +18,14 @@ const createBufferControl = (): BufferControl => {
     return buffer.length;
   };
 
+  const getSize = (): number => {
+    return size;
+  };
+
   return {
     addBuffer,
     getBuffer,
+    getSize,
     clearBuffer,
     getLength,
   };
