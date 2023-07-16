@@ -1,3 +1,5 @@
+import Checksum from 'shared/lib/Checksum';
+
 const checkAcceptedTypes = (type: TRequestType): boolean => {
   const acceptedTypes: TRequestType[] = ['file', 'message'];
 
@@ -23,6 +25,7 @@ const buildRequestObject = (
       maximumSegmentSize: header.maximumSegmentSize,
       syn: flag === 'SYN',
       fyn: flag === 'FYN',
+      checksum: Checksum.generateChecksum(data),
     },
     body: {
       data,

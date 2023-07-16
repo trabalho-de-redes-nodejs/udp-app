@@ -1,5 +1,6 @@
 import createBufferControl from '../Buffer';
 import { buildFile, checkIfFileExists, addContentToFile } from 'server/services/file';
+import Checksum from 'shared/lib/Checksum';
 import Protocoler from 'shared/lib/Protocoler';
 import Reports from 'shared/lib/Report';
 
@@ -27,8 +28,6 @@ const Receiver = (clientAck: number, clientMSS: number): IReceiver => {
 
     const missedAck = buffer.getMissedAck();
 
-    console.log('missedAck', missedAck);
-
     if (missedAck) {
       const connectionResponse: IRequest = Protocoler.buildRequestObject(
         {
@@ -41,12 +40,25 @@ const Receiver = (clientAck: number, clientMSS: number): IReceiver => {
       return JSON.stringify(connectionResponse);
     }
 
+    console.log(`checksum ${data.header.ack}`, Checksum.compareChecksum(data.body.data, data.header.checksum));
+
+    if (!Checksum.compareChecksum(data.body.data, data.header.checksum)) {
+      const connectionResponse: IRequest = Protocoler.buildRequestObject(
+        {
+          ...getTcpHeader(),
+          ack: ack,
+        },
+        '',
+        'ACK'
+      );
+      return JSON.stringify(connectionResponse);
+    }
+
     if (rwnd <= clientMSS) {
       await unpackBuffer(data.body?.fileName);
     }
 
     const connectionResponse: IRequest = Protocoler.buildRequestObject(getTcpHeader(), '', 'ACK');
-    console.log('connectionResponse', connectionResponse);
     return JSON.stringify(connectionResponse);
   };
 

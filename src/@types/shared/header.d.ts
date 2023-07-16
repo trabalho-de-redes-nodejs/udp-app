@@ -5,4 +5,5 @@ interface IHeader {
   maximumSegmentSize: number;
   syn?: boolean;
   fyn?: boolean;
+  checksum: string;
 }
