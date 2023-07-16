@@ -27,6 +27,8 @@ const Receiver = (clientAck: number, clientMSS: number): IReceiver => {
 
     const missedAck = buffer.getMissedAck();
 
+    console.log('missedAck', missedAck);
+
     if (missedAck) {
       const connectionResponse: IRequest = Protocoler.buildRequestObject(
         {
@@ -44,6 +46,7 @@ const Receiver = (clientAck: number, clientMSS: number): IReceiver => {
     }
 
     const connectionResponse: IRequest = Protocoler.buildRequestObject(getTcpHeader(), '', 'ACK');
+    console.log('connectionResponse', connectionResponse);
     return JSON.stringify(connectionResponse);
   };
 

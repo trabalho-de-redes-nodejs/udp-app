@@ -36,23 +36,21 @@ const createBufferControl = (_size: number): BufferControl => {
 
   const getMissedAck = (): number | null => {
     const getNextAckOfAPackage = (packageAck: string): string => {
-      if (!buffer[packageAck]) return `${packageAck}`;
-
       const nextAckOfAPackage = parseInt(packageAck) + buffer[packageAck].length;
       return `${nextAckOfAPackage}`;
     };
 
     if (!Object.keys(buffer).length) return null;
 
-    const entries = Object.entries(buffer);
+    const keys = Object.keys(buffer);
 
-    const missedAcks = entries
-      .map((entry) => {
-        const [ack] = entry;
+    const missedAcks = keys
+      .map((key, index) => {
+        if (index === keys.length - 1) return null;
 
-        const nextAckOfAPackage = getNextAckOfAPackage(ack);
+        const nextAckOfAPackage = getNextAckOfAPackage(key);
 
-        if (!buffer[nextAckOfAPackage]) return parseInt(ack);
+        if (!buffer[nextAckOfAPackage]) return parseInt(key);
 
         return null;
       })
@@ -62,24 +60,19 @@ const createBufferControl = (_size: number): BufferControl => {
   };
 
   const orderBuffer = (): void => {
-    const orderedBuffer: {
-      [key: string]: string;
-    } = {};
-
     const entries = Object.entries(buffer);
 
-    entries.forEach((entry) => {
-      const [ack, data] = entry;
+    entries.sort((a, b) => {
+      const aAck = parseInt(a[0]);
+      const bAck = parseInt(b[0]);
 
-      const nextAckOfAPackage = parseInt(ack) + data.length;
-
-      orderedBuffer[`${nextAckOfAPackage}`] = data;
+      return aAck - bAck;
     });
 
     clearBuffer();
 
-    Object.keys(orderedBuffer).forEach((key) => {
-      buffer[key] = orderedBuffer[key];
+    entries.forEach((key) => {
+      buffer[key[0]] = key[1];
     });
   };
 
