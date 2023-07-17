@@ -30,6 +30,8 @@ const Transferor = (pipeline: PipelineControl): ITransferor => {
   const establishConnection = async (): Promise<void> => {
     const syn: IRequest = Protocoler.buildRequestObject(getTcpHeader(), '', 'SYN');
 
+    Reports.addReport('Sending SYN to Server...');
+
     await Requester.request(syn)
       .then((response: string) => {
         const responseJSON: IResponse = JSON.parse(response);
