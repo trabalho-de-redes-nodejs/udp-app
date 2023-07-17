@@ -28,7 +28,7 @@ const Receiver = (clientAck: number, clientMSS: number): IReceiver => {
     rwnd -= data.body.data.length;
 
     if (!Checksum.compareChecksum(data.body.data, data.header.checksum) || ArbitraryError.chanceToError(5)) {
-      Reports.addReport(`ERROR received data from client: from: ${data.header.ack} | to: ${data.header.seq}`);
+      Reports.addReport(`ERROR received data from client: from: ${data.header.ack} | to: ${data.header.ack + data.body.data.length}`);
 
       const connectionResponse: IRequest = Protocoler.buildRequestObject(
         {
